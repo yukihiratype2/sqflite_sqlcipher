@@ -211,6 +211,7 @@ abstract class OpenDatabaseOptions {
       OnDatabaseVersionChangeFn onUpgrade,
       OnDatabaseVersionChangeFn onDowngrade,
       OnDatabaseOpenFn onOpen,
+      String password,
       bool readOnly = false,
       bool singleInstance = true}) {
     return impl.SqfliteOpenDatabaseOptions(
@@ -220,6 +221,7 @@ abstract class OpenDatabaseOptions {
         onUpgrade: onUpgrade,
         onDowngrade: onDowngrade,
         onOpen: onOpen,
+        password: password,
         readOnly: readOnly,
         singleInstance: singleInstance);
   }
@@ -230,6 +232,7 @@ abstract class OpenDatabaseOptions {
   OnDatabaseVersionChangeFn onUpgrade;
   OnDatabaseVersionChangeFn onDowngrade;
   OnDatabaseOpenFn onOpen;
+  String password;
   bool readOnly;
   bool singleInstance;
 }

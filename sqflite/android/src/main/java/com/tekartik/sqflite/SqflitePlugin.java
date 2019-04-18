@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteCantOpenDatabaseException;
-import android.database.sqlite.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabase;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -46,6 +46,7 @@ import static com.tekartik.sqflite.Constant.METHOD_QUERY;
 import static com.tekartik.sqflite.Constant.METHOD_UPDATE;
 import static com.tekartik.sqflite.Constant.PARAM_ID;
 import static com.tekartik.sqflite.Constant.PARAM_OPERATIONS;
+import static com.tekartik.sqflite.Constant.PARAM_PASSWORD;
 import static com.tekartik.sqflite.Constant.PARAM_PATH;
 import static com.tekartik.sqflite.Constant.PARAM_READ_ONLY;
 import static com.tekartik.sqflite.Constant.PARAM_RECOVERED;
@@ -82,6 +83,7 @@ public class SqflitePlugin implements MethodCallHandler {
     // Plugin registration.
     //
     public static void registerWith(Registrar registrar) {
+        SQLiteDatabase.loadLibs(registrar.context());
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "com.tekartik.sqflite");
         channel.setMethodCallHandler(new SqflitePlugin(registrar.context()));
     }
@@ -603,6 +605,11 @@ public class SqflitePlugin implements MethodCallHandler {
     //
     private void onOpenDatabaseCall(MethodCall call, Result result) {
         String path = call.argument(PARAM_PATH);
+
+        String password = null;
+        if (call.hasArgument(PARAM_PASSWORD))
+            password = call.argument(PARAM_PASSWORD);
+
         Boolean readOnly = call.argument(PARAM_READ_ONLY);
         boolean inMemory = isInMemoryPath(path);
 
@@ -657,7 +664,7 @@ public class SqflitePlugin implements MethodCallHandler {
         synchronized (databaseMapLocker) {
             databaseId = ++this.databaseId;
         }
-        Database database = new Database(context, path, databaseId, singleInstance);
+        Database database = new Database(context, path, password, databaseId, singleInstance);
         // force opening
         try {
             if (Boolean.TRUE.equals(readOnly)) {
@@ -815,22 +822,24 @@ public class SqflitePlugin implements MethodCallHandler {
     private static class Database {
         final boolean singleInstance;
         final String path;
+        final String password;
         final int id;
         SQLiteDatabase sqliteDatabase;
 
-        private Database(Context context, String path, int id, boolean singleInstance) {
+        private Database(Context context, String path, String password, int id, boolean singleInstance) {
             this.path = path;
+            this.password = (password != null) ? password : "";
             this.singleInstance = singleInstance;
             this.id = id;
         }
 
         private void open() {
-            sqliteDatabase = SQLiteDatabase.openDatabase(path, null,
+            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null,
                     SQLiteDatabase.CREATE_IF_NECESSARY);
         }
 
         private void openReadOnly() {
-            sqliteDatabase = SQLiteDatabase.openDatabase(path, null,
+            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null,
                     SQLiteDatabase.OPEN_READONLY);
         }
 
@@ -848,11 +857,12 @@ public class SqflitePlugin implements MethodCallHandler {
 
         public boolean enableWriteAheadLogging() {
             try {
-                return sqliteDatabase.enableWriteAheadLogging();
+                sqliteDatabase.rawExecSQL("PRAGMA journal_mode=WAL;");
             } catch (Exception e) {
                 Log.e(TAG, "enable WAL error: " + e);
                 return false;
             }
+            return true;
         }
 
         String getThreadLogTag() {
