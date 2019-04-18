@@ -28,6 +28,7 @@ static NSString *const _paramRecovered = @"recovered";
 static NSString *const _paramOperations = @"operations";
 // For each batch operation
 static NSString *const _paramPath = @"path";
+static NSString *const _paramPassword = @"password";
 static NSString *const _paramId = @"id";
 static NSString *const _paramTable = @"table";
 static NSString *const _paramValues = @"values";
@@ -543,13 +544,13 @@ static NSInteger _databaseOpenCount = 0;
 //
 - (void)handleOpenDatabaseCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString* path = call.arguments[_paramPath];
+    NSString* password = call.arguments[_paramPassword];
     NSNumber* readOnlyValue = call.arguments[_paramReadOnly];
     bool readOnly = [readOnlyValue boolValue] == true;
     NSNumber* singleInstanceValue = call.arguments[_paramSingleInstance];
     bool inMemoryPath = [SqflitePlugin isInMemoryPath:path];
     // A single instance must be a regular database
     bool singleInstance = [singleInstanceValue boolValue] != false && !inMemoryPath;
-    
     if (_log) {
         NSLog(@"opening %@ %@ %@", path, readOnly ? @" read-only" : @"", singleInstance ? @"" : @" new instance");
     }
@@ -580,6 +581,15 @@ static NSInteger _databaseOpenCount = 0;
                                    details:nil]);
         return;
     }
+
+    [queue inDatabase:^(FMDatabase *database) {
+        if (password == nil) {
+            [database setKey:@""];
+        } else {
+            [database setKey:password];
+        }
+        NSLog(@"Encryption is ready.");
+    }];
     
     NSNumber* databaseId;
     @synchronized (self.mapLock) {
