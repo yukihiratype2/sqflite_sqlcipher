@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabaseHook;
+
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -834,13 +836,34 @@ public class SqflitePlugin implements MethodCallHandler {
         }
 
         private void open() {
-            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null,
-                    SQLiteDatabase.CREATE_IF_NECESSARY);
+            openWithFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
+
         }
 
         private void openReadOnly() {
-            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null,
-                    SQLiteDatabase.OPEN_READONLY);
+            openWithFlags(SQLiteDatabase.OPEN_READONLY);
+        }
+
+        private void openWithFlags(int flags){
+            try {
+
+                sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, null);
+
+            }catch (Exception e) {
+                Log.d(TAG, "Opening db in " + path + " with PRAGMA cipher_migrate");
+                SQLiteDatabaseHook hook = new SQLiteDatabaseHook() {
+                    @Override
+                    public void preKey(SQLiteDatabase database) {
+                    }
+
+                    @Override
+                    public void postKey(SQLiteDatabase database) {
+                        database.rawExecSQL("PRAGMA cipher_migrate;");
+                    }
+                };
+
+                sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, hook);
+            }
         }
 
         public void close() {
