@@ -1,10 +1,10 @@
 package com.tekartik.sqflite;
 
-import android.content.Context;
 import android.util.Log;
 
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteDatabaseHook;
+import net.sqlcipher.DatabaseErrorHandler;
 
 import static com.tekartik.sqflite.Constant.TAG;
 
@@ -15,6 +15,8 @@ class Database {
     final int id;
     final int logLevel;
     SQLiteDatabase sqliteDatabase;
+    boolean inTransaction;
+
 
     Database(String path, String password, int id, boolean singleInstance, int logLevel) {
         this.path = path;
@@ -30,14 +32,27 @@ class Database {
 
     }
 
+    // Change default error handler to avoid erasing the existing file.
     public void openReadOnly() {
-        openWithFlags(SQLiteDatabase.OPEN_READONLY);
+        openWithFlags(SQLiteDatabase.OPEN_READONLY, new DatabaseErrorHandler() {
+            @Override
+            public void onCorruption(SQLiteDatabase dbObj) {
+                // ignored
+                // default implementation delete the file
+                //
+                // This happens asynchronously so cannot be tracked. However a simple
+                // access should fail
+            }
+        });
     }
 
-    private void openWithFlags(int flags){
-        try {
+    private void openWithFlags(int flags) {
+        openWithFlags(flags, null);
+    }
 
-            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, null);
+    private void openWithFlags(int flags, DatabaseErrorHandler errorHandler) {
+        try {
+            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, null, errorHandler);
 
         }catch (Exception e) {
             Log.d(TAG, "Opening db in " + path + " with PRAGMA cipher_migrate");
@@ -52,7 +67,7 @@ class Database {
                 }
             };
 
-            sqliteDatabase = net.sqlcipher.database.SQLiteDatabase.openDatabase(path, password, null, flags, hook);
+            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, hook, errorHandler);
         }
     }
 
@@ -72,7 +87,7 @@ class Database {
         try {
             sqliteDatabase.rawExecSQL("PRAGMA journal_mode=WAL;");
         } catch (Exception e) {
-            Log.e(TAG, "enable WAL error: " + e);
+            Log.e(TAG, getThreadLogPrefix() + "enable WAL error: " + e);
             return false;
         }
         return true;
@@ -82,5 +97,9 @@ class Database {
         Thread thread = Thread.currentThread();
 
         return "" + id + "," + thread.getName() + "(" + thread.getId() + ")";
+    }
+
+    String getThreadLogPrefix() {
+        return "[" + getThreadLogTag() + "] ";
     }
 }

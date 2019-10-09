@@ -22,6 +22,8 @@ Dependency overrides are used to avoid conflict with other projects that depend 
 
 ---
 
+[![Build Status](https://travis-ci.org/tekartik/sqflite.svg?branch=master)](https://travis-ci.org/tekartik/sqflite)
+
 SQLite plugin for [Flutter](https://flutter.io).
 Supports both iOS and Android.
 
