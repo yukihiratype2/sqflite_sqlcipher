@@ -4,7 +4,9 @@ This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).  
 
 This fork adds an optional parameter "password" to open encrypted databases.
 
-The SQLCipher version of the plugin is 4.10. If you try to open a database encrypted with a lower version of SQLCipher, the plugin will try to migrate it to a new version using the operation `PRAGMA cipher_migrate`.
+The SQLCipher version of the plugin is 4.10. If you try to open a database encrypted with a lower version of SQLCipher, the plugin will try to migrate it to a new version using the operation `PRAGMA cipher_migrate` (This automatic migration to version 4 is only done in Android. PR welcome for this feature in iOS).
+
+### Install
 
 To add it in your project include this in the `pubspec.yml`.
 ```
@@ -20,7 +22,13 @@ dependency_overrides:
 ```
 Dependency overrides are used to avoid conflict with other projects that depend on "normal" sqflite. For example https://github.com/renefloor/flutter_cache_manager
 
-If using ProGuard in Android, add the following rules:
+### iOS
+To use SqlCipher version 4 and be consitent on both Android and iOS, include this in the Podfile
+```
+pod 'SQLCipher', '~>4.1.0'
+```
+### Android
+If using ProGuard, add the following rules:
 ```
 -keep class net.sqlcipher.** { *; }
 -keep class net.sqlcipher.database.* { *; }
