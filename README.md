@@ -20,6 +20,12 @@ dependency_overrides:
 ```
 Dependency overrides are used to avoid conflict with other projects that depend on "normal" sqflite. For example https://github.com/renefloor/flutter_cache_manager
 
+If using ProGuard in Android, add the following rules:
+```
+-keep class net.sqlcipher.** { *; }
+-keep class net.sqlcipher.database.* { *; }
+```
+
 ---
 
 [![Build Status](https://travis-ci.org/tekartik/sqflite.svg?branch=master)](https://travis-ci.org/tekartik/sqflite)
