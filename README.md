@@ -27,6 +27,8 @@ To use SqlCipher version 4 and be consitent on both Android and iOS, include thi
 ```
 pod 'SQLCipher', '~>4.1.0'
 ```
+If you try to use a database ecrypted with a SqlCipher version lower than 4, the version in the Podfile can be changed to a lower one `'~>3.4.2'`. But note that if doing that, the running database on Android will be version 4 (since it migrates automatically) and on iOS will be version 3.  
+
 ### Android
 If using ProGuard, add the following rules:
 ```
