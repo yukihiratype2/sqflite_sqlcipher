@@ -294,6 +294,7 @@ abstract class OpenDatabaseOptions {
 
   /// Called after all other callbacks have been called.
   OnDatabaseOpenFn onOpen;
+  /// Database password (optional)
   String password;
 
   /// Open the database in read-only mode (no callback called).

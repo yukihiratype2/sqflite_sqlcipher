@@ -8,6 +8,7 @@ import 'package:sqflite_example/deprecated_test_page.dart';
 import 'package:sqflite_example/exception_test_page.dart';
 import 'package:sqflite_example/exp_test_page.dart';
 import 'package:sqflite_example/manual_test_page.dart';
+import 'package:sqflite_example/sqlcipher_test_page.dart';
 import 'package:sqflite_example/src/dev_utils.dart';
 
 import 'model/main_item.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
+const String testSqlCipherRoute = "/test/sqlcipher";
 const String testRawRoute = "/test/simple";
 const String testOpenRoute = "/test/open";
 const String testSlowRoute = "/test/slow";
@@ -43,6 +45,7 @@ const String testDeprecatedRoute = "/test/deprecated";
 class _MyAppState extends State<MyApp> {
   var routes = <String, WidgetBuilder>{
     '/test': (BuildContext context) => MyHomePage(),
+    testSqlCipherRoute: (BuildContext context) => SqlCipherTestPage(),
     testRawRoute: (BuildContext context) => RawTestPage(),
     testOpenRoute: (BuildContext context) => OpenTestPage(),
     testSlowRoute: (BuildContext context) => SlowTestPage(),
@@ -78,6 +81,8 @@ class _MyAppState extends State<MyApp> {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key) {
+    items.add(
+        MainItem("Sqlcipher tests", "Simple tests with an encrypted database", route: testSqlCipherRoute));
     items.add(
         MainItem("Raw tests", "Raw SQLite operations", route: testRawRoute));
     items.add(MainItem("Open tests", "Open onCreate/onUpgrade/onDowngrade",
