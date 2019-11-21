@@ -18,7 +18,7 @@ dependency_overrides:
     git:
       url: https://www.github.com/davidmartos96/sqflite_sqlcipher.git
       path: sqflite
-      ref: 13d0fd521664f762b0673733447dea5cebd6d0d2
+      ref: 8f7a3899d3bd80090a8be2f68a0f285e753401e9
 ```
 Dependency overrides are used to avoid conflict with other projects that depend on "normal" sqflite. For example https://github.com/renefloor/flutter_cache_manager
 
