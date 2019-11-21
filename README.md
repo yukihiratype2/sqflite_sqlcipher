@@ -23,7 +23,7 @@ dependency_overrides:
 Dependency overrides are used to avoid conflict with other projects that depend on "normal" sqflite. For example https://github.com/renefloor/flutter_cache_manager
 
 ### iOS
-**REQUIRED:** Include this in your iOS Podfile
+**REQUIRED:** Include this in your iOS `Podfile`
 ```
 pod 'SQLCipher', '~>4.1.0'
 ```
