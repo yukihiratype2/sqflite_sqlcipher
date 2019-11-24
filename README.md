@@ -1,6 +1,6 @@
 # sqflite_sqlcipher
 
-This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).  **Up to date with version 1.1.7+1**
+This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).  **Up to date with version 1.1.7+3**
 
 This fork adds an optional parameter "password" to open encrypted databases. Everything else behaves like the `sqflite` plugin, same API.
 
@@ -27,7 +27,7 @@ Dependency overrides are used to avoid conflict with other projects that depend 
 ```
 pod 'SQLCipher', '~>4.1.0'
 ```
-If you try to use a database encrypted with a SqlCipher version lower than 4, the version in the Podfile can be changed to a lower one `'~>3.4.2'`. But note that if doing that, the running database on Android will be version 4 (since it migrates automatically) and on iOS will be version 3.  
+If you try to use a database encrypted with a SqlCipher version lower than 4, the version in the Podfile can be changed to a lower one `'~>3.4.2'`. But note that if doing that, the running database on Android will be version 4 (since it migrates automatically) and on iOS will be version 3.
 
 ### Android
 If using ProGuard, add the following rules:
@@ -38,13 +38,15 @@ If using ProGuard, add the following rules:
 
 ---
 
+[![pub package](https://img.shields.io/pub/v/sqflite.svg)](https://pub.dev/packages/sqflite)
 [![Build Status](https://travis-ci.org/tekartik/sqflite.svg?branch=master)](https://travis-ci.org/tekartik/sqflite)
+[![codecov](https://codecov.io/gh/tekartik/sqflite/branch/master/graph/badge.svg)](https://codecov.io/gh/tekartik/sqflite)
 
 SQLite plugin for [Flutter](https://flutter.io).
 Supports both iOS and Android.
 
 * Support transactions and batches
-* Automatic version managment during open
+* Automatic version management during open
 * Helpers for insert/query/update/delete queries
 * DB operation executed in a background thread on iOS and Android
 
