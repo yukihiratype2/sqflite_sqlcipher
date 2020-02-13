@@ -1,3 +1,17 @@
+## 1.2.1-dev.3
+
+* Support Android embedding v2
+* Add private mixin
+
+## 1.2.0
+
+* Add MacOS support
+
+## 1.1.8
+
+* support `deleteDatabase` after hot-restart. Existing, if any, single instance database ìs closed
+before deletion
+
 ## 1.1.7+3
 
 * Bump flutter/dart dependency version (1.9.1/2.5.0)

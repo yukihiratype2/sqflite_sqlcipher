@@ -99,17 +99,13 @@ void main() {
       await Directory(dirname(fullPath)).create(recursive: true);
       await File(fullPath).writeAsString('test');
 
-      // Open is fine, that is the native behavior
-      var db = await openReadOnlyDatabase(fullPath);
       expect(await File(fullPath).readAsString(), 'test');
       try {
-        var version = await db.getVersion();
-        print(await db.query('sqlite_master'));
-        fail('getVersion should fail ${db?.path} $version');
+        var db = await openReadOnlyDatabase(fullPath);
+        await db.close();
       } on DatabaseException catch (_) {
-        // Android: DatabaseException(file is not a database (code 26 SQLITE_NOTADB)) sql 'PRAGMA user_version' args []}
+        // Android: DatabaseException(file is not a database)
       }
-      await db.close();
       expect(await File(fullPath).readAsString(), 'test');
 
       expect(await isDatabase(fullPath), isFalse);
@@ -206,6 +202,36 @@ void main() {
         {'?1 + ?2': 7}
       ]);
       await db.close();
+    });
+
+    test('deleteDatabase', () async {
+      // await devVerbose();
+      Database db;
+      try {
+        var path = 'test_delete_database.db';
+        await deleteDatabase(path);
+        db = await openDatabase(path);
+        expect(await db.getVersion(), 0);
+        await db.setVersion(1);
+
+        // delete without closing every time
+        await deleteDatabase(path);
+        db = await openDatabase(path);
+        expect(await db.getVersion(), 0);
+        await db.execute('BEGIN TRANSACTION');
+        await db.setVersion(2);
+
+        await deleteDatabase(path);
+        db = await openDatabase(path);
+        expect(await db.getVersion(), 0);
+        await db.setVersion(3);
+
+        await deleteDatabase(path);
+        db = await openDatabase(path);
+        expect(await db.getVersion(), 0);
+      } finally {
+        await db?.close();
+      }
     });
   });
 }

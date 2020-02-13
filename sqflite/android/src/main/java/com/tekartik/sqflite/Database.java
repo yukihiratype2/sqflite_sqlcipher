@@ -5,6 +5,7 @@ import android.util.Log;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteDatabaseHook;
 import net.sqlcipher.DatabaseErrorHandler;
+import java.io.File;
 
 import static com.tekartik.sqflite.Constant.TAG;
 
@@ -101,5 +102,15 @@ class Database {
 
     String getThreadLogPrefix() {
         return "[" + getThreadLogTag() + "] ";
+    }
+
+
+    static void deleteDatabase(String path) {
+        File file = new File(path);
+
+        file.delete();
+        new File(file.getPath() + "-journal").delete();
+        new File(file.getPath() + "-shm").delete();
+        new File(file.getPath() + "-wal").delete();
     }
 }

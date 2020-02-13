@@ -43,7 +43,7 @@ If using ProGuard, add the following rules:
 [![codecov](https://codecov.io/gh/tekartik/sqflite/branch/master/graph/badge.svg)](https://codecov.io/gh/tekartik/sqflite)
 
 SQLite plugin for [Flutter](https://flutter.io).
-Supports both iOS and Android.
+Supports iOS, Android and MacOS.
 
 * Support transactions and batches
 * Automatic version management during open

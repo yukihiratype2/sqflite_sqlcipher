@@ -13,6 +13,7 @@ static NSString *const _methodDebug = @"debug";
 static NSString *const _methodOptions = @"options";
 static NSString *const _methodOpenDatabase = @"openDatabase";
 static NSString *const _methodCloseDatabase = @"closeDatabase";
+static NSString *const _methodDeleteDatabase = @"deleteDatabase";
 static NSString *const _methodExecute = @"execute";
 static NSString *const _methodInsert = @"insert";
 static NSString *const _methodUpdate = @"update";
@@ -617,6 +618,18 @@ static NSInteger _databaseOpenCount = 0;
         }
     }
     
+    // Make sure the directory exists
+    if (!inMemoryPath && !readOnly) {
+        NSError* error;
+        NSString* parentDir = [path stringByDeletingLastPathComponent];
+        if (![[NSFileManager defaultManager] fileExistsAtPath:parentDir]) {
+            if (_log) {
+                NSLog(@"Creating parent dir %@", parentDir);
+            }
+            [[NSFileManager defaultManager] createDirectoryAtPath:parentDir withIntermediateDirectories:YES attributes:nil error:&error];
+            // Ingore the error, it will break later during open
+        }
+    }
     FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:path flags:(readOnly ? SQLITE_OPEN_READONLY : (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE))];
     bool success = queue != nil;
     
@@ -675,6 +688,17 @@ static NSInteger _databaseOpenCount = 0;
     if (hasSqlLogLevel(database.logLevel)) {
         NSLog(@"closing %@", database.path);
     }
+    [self closeDatabase:database];
+    result(nil);
+}
+
+//
+// close action
+//
+- (void)closeDatabase:(SqfliteDatabase*)database {
+    if (hasSqlLogLevel(database.logLevel)) {
+        NSLog(@"closing %@", database.path);
+    }
     [database.fmDatabaseQueue close];
     
     @synchronized (self.mapLock) {
@@ -687,6 +711,39 @@ static NSInteger _databaseOpenCount = 0;
                 NSLog(@"No more databases open");
             }
         }
+    }
+}
+
+//
+// delete
+//
+- (void)handleDeleteDatabaseCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* path = call.arguments[_paramPath];
+    
+    bool _log = hasSqlLogLevel(logLevel);
+    
+    // Handle hot-restart for single instance
+    // The dart code is killed but the native code remains
+    SqfliteDatabase* database = nil;
+    @synchronized (self.mapLock) {
+        database = self.singleInstanceDatabaseMap[path];
+        if (database != nil) {
+            // Check if openedŸ
+            if (_log) {
+                NSLog(@"Deleting opened %@ id %@", path, database.databaseId);
+            }
+        }
+    }
+    
+    if (database != nil) {
+        [self closeDatabase:database];
+    }
+    
+    if (hasSqlLogLevel(database.logLevel)) {
+        NSLog(@"Deleting %@", path);
+    }
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
     }
     result(nil);
 }
@@ -778,7 +835,12 @@ static NSInteger _databaseOpenCount = 0;
     };
     
     if ([_methodGetPlatformVersion isEqualToString:call.method]) {
+#if TARGET_OS_IPHONE
         result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
+        
+#else
+        result([@"macOS " stringByAppendingString:[[NSProcessInfo processInfo] operatingSystemVersionString]]);
+#endif
     } else if ([_methodOpenDatabase isEqualToString:call.method]) {
         [self handleOpenDatabaseCall:call result:wrappedResult];
     } else if ([_methodInsert isEqualToString:call.method]) {
@@ -795,6 +857,8 @@ static NSInteger _databaseOpenCount = 0;
         [self handleGetDatabasesPath:call result:result];
     } else if ([_methodCloseDatabase isEqualToString:call.method]) {
         [self handleCloseDatabaseCall:call result:wrappedResult];
+    } else if ([_methodDeleteDatabase isEqualToString:call.method]) {
+        [self handleDeleteDatabaseCall:call result:wrappedResult];
     } else if ([_methodOptions isEqualToString:call.method]) {
         [self handleOptionsCall:call result:result];
     } else if ([_methodDebug isEqualToString:call.method]) {
