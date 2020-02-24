@@ -33,7 +33,6 @@ If you try to use a database encrypted with a SqlCipher version lower than 4, th
 If using ProGuard, add the following rules:
 ```
 -keep class net.sqlcipher.** { *; }
--keep class net.sqlcipher.database.* { *; }
 ```
 
 ---
