@@ -19,7 +19,7 @@ In your flutter project add the dependency:
 ```yml
 dependencies:
   ...
-  sqflite: ^1.2.0
+  sqflite: ^1.2.2
 ```
 
 For help getting started with Flutter, view the online
@@ -341,7 +341,6 @@ More information on supported types [here](https://github.com/tekartik/sqflite/b
 ### BLOB
 
 * Dart type: `Uint8List`
-* Dart type `List<int>` is supported but not recommended (slow conversion)
 
 ## Current issues
 

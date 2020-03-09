@@ -1,3 +1,5 @@
+import 'package:sqflite/src/value_utils.dart';
+
 /// Insert/Update conflict resolver
 enum ConflictAlgorithm {
   /// When a constraint violation occurs, an immediate ROLLBACK occurs,
@@ -60,7 +62,8 @@ class SqlBuilder {
   ///            will be replaced by the values from whereArgs. The values
   ///            will be bound as Strings.
   SqlBuilder.delete(String table, {String where, List<dynamic> whereArgs}) {
-    final StringBuffer delete = StringBuffer();
+    checkWhereArgs(whereArgs);
+    final delete = StringBuffer();
     delete.write('DELETE FROM ');
     delete.write(_escapeName(table));
     _writeClause(delete, ' WHERE ', where);
@@ -105,8 +108,9 @@ class SqlBuilder {
       throw ArgumentError(
           'HAVING clauses are only permitted when using a groupBy clause');
     }
+    checkWhereArgs(whereArgs);
 
-    final StringBuffer query = StringBuffer();
+    final query = StringBuffer();
 
     query.write('SELECT ');
     if (distinct == true) {
@@ -142,7 +146,7 @@ class SqlBuilder {
 
   SqlBuilder.insert(String table, Map<String, dynamic> values,
       {String nullColumnHack, ConflictAlgorithm conflictAlgorithm}) {
-    final StringBuffer insert = StringBuffer();
+    final insert = StringBuffer();
     insert.write('INSERT');
     if (conflictAlgorithm != null) {
       insert.write(_conflictValues[conflictAlgorithm.index]);
@@ -152,13 +156,13 @@ class SqlBuilder {
     insert.write(' (');
 
     List<dynamic> bindArgs;
-    final int size = (values != null) ? values.length : 0;
+    final size = (values != null) ? values.length : 0;
 
     if (size > 0) {
-      final StringBuffer sbValues = StringBuffer(') VALUES (');
+      final sbValues = StringBuffer(') VALUES (');
 
       bindArgs = <dynamic>[];
-      int i = 0;
+      var i = 0;
       values.forEach((String colName, dynamic value) {
         if (i++ > 0) {
           insert.write(', ');
@@ -169,6 +173,7 @@ class SqlBuilder {
         if (value == null) {
           sbValues.write('NULL');
         } else {
+          checkNonNullValue(value);
           bindArgs.add(value);
           sbValues.write('?');
         }
@@ -205,8 +210,9 @@ class SqlBuilder {
     if (values == null || values.isEmpty) {
       throw ArgumentError('Empty values');
     }
+    checkWhereArgs(whereArgs);
 
-    final StringBuffer update = StringBuffer();
+    final update = StringBuffer();
     update.write('UPDATE ');
     if (conflictAlgorithm != null) {
       update.write(_conflictValues[conflictAlgorithm.index]);
@@ -214,15 +220,16 @@ class SqlBuilder {
     update.write(_escapeName(table));
     update.write(' SET ');
 
-    final List<dynamic> bindArgs = <dynamic>[];
-    int i = 0;
+    final bindArgs = <dynamic>[];
+    var i = 0;
 
     values.keys.forEach((String colName) {
       update.write((i++ > 0) ? ', ' : '');
       update.write(_escapeName(colName));
       final dynamic value = values[colName];
       if (value != null) {
-        bindArgs.add(values[colName]);
+        checkNonNullValue(value);
+        bindArgs.add(value);
         update.write(' = ?');
       } else {
         update.write(' = NULL');
@@ -269,10 +276,10 @@ class SqlBuilder {
   /// Add the names that are non-null in columns to s, separating
   /// them with commas.
   void _writeColumns(StringBuffer s, List<String> columns) {
-    final int n = columns.length;
+    final n = columns.length;
 
-    for (int i = 0; i < n; i++) {
-      final String column = columns[i];
+    for (var i = 0; i < n; i++) {
+      final column = columns[i];
 
       if (column != null) {
         if (i > 0) {
@@ -288,8 +295,8 @@ class SqlBuilder {
 /// True if a name had been escaped already.
 bool isEscapedName(String name) {
   if (name != null && name.length >= 2) {
-    final String first = name[0];
-    final String last = name[name.length - 1];
+    final first = name[0];
+    final last = name[name.length - 1];
     if (first == last) {
       switch (first) {
         case '"':
