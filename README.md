@@ -1,6 +1,6 @@
 # sqflite_sqlcipher
 
-This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).  **Up to date with version 1.2.1**
+This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).  **Up to date with version 1.2.2+1**
 
 This fork adds an optional parameter "password" to open encrypted databases. Everything else behaves like the `sqflite` plugin, same API.
 
@@ -18,7 +18,7 @@ dependency_overrides:
     git:
       url: https://www.github.com/davidmartos96/sqflite_sqlcipher.git
       path: sqflite
-      ref: a62f579040c5faa0645683e0b10a4f15484bf2f3
+      ref: 50a4ac06b323e1ce3d0cd055125a6f4a7454f2d5
 ```
 Dependency overrides are used to avoid conflict with other projects that depend on "normal" sqflite. For example https://github.com/renefloor/flutter_cache_manager
 
