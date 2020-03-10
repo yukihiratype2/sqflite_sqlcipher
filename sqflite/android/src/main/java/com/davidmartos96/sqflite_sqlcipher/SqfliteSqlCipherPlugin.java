@@ -67,9 +67,9 @@ import static com.davidmartos96.sqflite_sqlcipher.Constant.PARAM_SQL_ARGUMENTS;
 import static com.davidmartos96.sqflite_sqlcipher.Constant.TAG;
 
 /**
- * SqflitePlugin Android implementation
+ * SqfliteSqlCipherPlugin Android implementation
  */
-public class SqflitePlugin implements FlutterPlugin, MethodCallHandler {
+public class SqfliteSqlCipherPlugin implements FlutterPlugin, MethodCallHandler {
 
 
     static final Map<String, Integer> _singleInstancesByPath = new HashMap<>();
@@ -91,12 +91,12 @@ public class SqflitePlugin implements FlutterPlugin, MethodCallHandler {
     static final Map<Integer, Database> databaseMap = new HashMap<>();
 
     // Needed public constructor
-    public SqflitePlugin() {
+    public SqfliteSqlCipherPlugin() {
 
     }
 
     // Testing only
-    public SqflitePlugin(Context context) {
+    public SqfliteSqlCipherPlugin(Context context) {
         this.context = context.getApplicationContext();
     }
 
@@ -104,7 +104,7 @@ public class SqflitePlugin implements FlutterPlugin, MethodCallHandler {
     // Plugin registration.
     //
     public static void registerWith(Registrar registrar) {
-        SqflitePlugin sqflitePlugin = new SqflitePlugin();
+        SqfliteSqlCipherPlugin sqflitePlugin = new SqfliteSqlCipherPlugin();
         sqflitePlugin.onAttachedToEngine(registrar.context(), registrar.messenger());
     }
 
@@ -496,7 +496,7 @@ public class SqflitePlugin implements FlutterPlugin, MethodCallHandler {
                 if (queryAsMapList) {
                     Map<String, Object> map = cursorRowToMap(cursor);
                     if (LogLevel.hasSqlLevel(database.logLevel)) {
-                        Log.d(TAG, database.getThreadLogPrefix() + SqflitePlugin.toString(map));
+                        Log.d(TAG, database.getThreadLogPrefix() + SqfliteSqlCipherPlugin.toString(map));
                     }
                     results.add(map);
                 } else {
@@ -754,7 +754,7 @@ public class SqflitePlugin implements FlutterPlugin, MethodCallHandler {
         // Generate new id
         int newDatabaseId;
         synchronized (databaseMapLocker) {
-            newDatabaseId = ++SqflitePlugin.this.databaseId;
+            newDatabaseId = ++SqfliteSqlCipherPlugin.this.databaseId;
         }
         final int databaseId = newDatabaseId;
 
@@ -765,11 +765,11 @@ public class SqflitePlugin implements FlutterPlugin, MethodCallHandler {
         synchronized (databaseMapLocker) {
             // Create handler if necessary
             if (handler == null) {
-                handlerThread = new HandlerThread("Sqflite", SqflitePlugin.THREAD_PRIORITY);
+                handlerThread = new HandlerThread("Sqflite", SqfliteSqlCipherPlugin.THREAD_PRIORITY);
                 handlerThread.start();
                 handler = new Handler(handlerThread.getLooper());
                 if (LogLevel.hasSqlLevel(database.logLevel)) {
-                    Log.d(TAG, database.getThreadLogPrefix() + "starting thread" + handlerThread + " priority " + SqflitePlugin.THREAD_PRIORITY);
+                    Log.d(TAG, database.getThreadLogPrefix() + "starting thread" + handlerThread + " priority " + SqfliteSqlCipherPlugin.THREAD_PRIORITY);
                 }
             }
             if (LogLevel.hasSqlLevel(database.logLevel)) {
@@ -1027,7 +1027,7 @@ public class SqflitePlugin implements FlutterPlugin, MethodCallHandler {
         }
         Integer logLevel = LogLevel.getLogLevel(call);
         if (logLevel != null) {
-            SqflitePlugin.logLevel = logLevel;
+            SqfliteSqlCipherPlugin.logLevel = logLevel;
         }
         result.success(null);
     }

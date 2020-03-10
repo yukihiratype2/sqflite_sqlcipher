@@ -4,7 +4,7 @@
 #import <FlutterMacOS/FlutterMacOS.h>
 #endif
 
-@interface SqflitePlugin : NSObject<FlutterPlugin>
+@interface SqfliteSqlCipherPlugin : NSObject<FlutterPlugin>
 
 + (NSArray*)toSqlArguments:(NSArray*)rawArguments;
 

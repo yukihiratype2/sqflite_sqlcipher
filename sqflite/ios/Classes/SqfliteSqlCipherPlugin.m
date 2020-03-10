@@ -1,4 +1,4 @@
-#import "SqflitePlugin.h"
+#import "SqfliteSqlCipherPlugin.h"
 
 // Include files differs on ios and MacOS
 #if TARGET_OS_IPHONE
@@ -38,6 +38,7 @@ static NSString *const _paramRecoveredInTransaction = @"recoveredInTransaction";
 static NSString *const _paramOperations = @"operations";
 // For each batch operation
 static NSString *const _paramPath = @"path";
+static NSString *const _paramPassword = @"password";
 static NSString *const _paramId = @"id";
 static NSString *const _paramTable = @"table";
 static NSString *const _paramValues = @"values";
@@ -82,7 +83,7 @@ NSString *const SqfliteParamErrorData = @"data";
 
 @end
 
-@interface SqflitePlugin ()
+@interface SqfliteSqlCipherPlugin ()
 
 @property (atomic, retain) NSMutableDictionary<NSNumber*, SqfliteDatabase*>* databaseMap;
 @property (atomic, retain) NSMutableDictionary<NSString*, SqfliteDatabase*>* singleInstanceDatabaseMap;
@@ -97,7 +98,7 @@ NSString *const SqfliteParamErrorData = @"data";
 
 @end
 
-@implementation SqflitePlugin
+@implementation SqfliteSqlCipherPlugin
 
 @synthesize databaseMap;
 @synthesize mapLock;
@@ -132,7 +133,7 @@ static NSInteger _databaseOpenCount = 0;
     FlutterMethodChannel* channel = [FlutterMethodChannel
                                      methodChannelWithName:_channelName
                                      binaryMessenger:[registrar messenger]];
-    SqflitePlugin* instance = [[SqflitePlugin alloc] init];
+    SqfliteSqlCipherPlugin* instance = [[SqfliteSqlCipherPlugin alloc] init];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -235,9 +236,9 @@ static NSInteger _databaseOpenCount = 0;
 
 + (NSArray*)toSqlArguments:(NSArray*)rawArguments {
     NSMutableArray* array = [NSMutableArray new];
-    if (![SqflitePlugin arrayIsEmpy:rawArguments]) {
+    if (![SqfliteSqlCipherPlugin arrayIsEmpy:rawArguments]) {
         for (int i = 0; i < [rawArguments count]; i++) {
-            [array addObject:[SqflitePlugin toSqlValue:[rawArguments objectAtIndex:i]]];
+            [array addObject:[SqfliteSqlCipherPlugin toSqlValue:[rawArguments objectAtIndex:i]]];
         }
     }
     return array;
@@ -246,7 +247,7 @@ static NSInteger _databaseOpenCount = 0;
 + (NSDictionary*)fromSqlDictionary:(NSDictionary*)sqlDictionary {
     NSMutableDictionary* dictionary = [NSMutableDictionary new];
     [sqlDictionary enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-        [dictionary setObject:[SqflitePlugin fromSqlValue:value] forKey:key];
+        [dictionary setObject:[SqfliteSqlCipherPlugin fromSqlValue:value] forKey:key];
     }];
     return dictionary;
 }
@@ -254,8 +255,8 @@ static NSInteger _databaseOpenCount = 0;
 - (bool)executeOrError:(SqfliteDatabase*)database fmdb:(FMDatabase*)db call:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString* sql = call.arguments[SqfliteParamSql];
     NSArray* arguments = call.arguments[SqfliteParamSqlArguments];
-    NSArray* sqlArguments = [SqflitePlugin toSqlArguments:arguments];
-    BOOL argumentsEmpty = [SqflitePlugin arrayIsEmpy:arguments];
+    NSArray* sqlArguments = [SqfliteSqlCipherPlugin toSqlArguments:arguments];
+    BOOL argumentsEmpty = [SqfliteSqlCipherPlugin arrayIsEmpy:arguments];
     if (hasSqlLogLevel(database.logLevel)) {
         NSLog(@"%@ %@", sql, argumentsEmpty ? @"" : sqlArguments);
     }
@@ -278,7 +279,7 @@ static NSInteger _databaseOpenCount = 0;
     NSString* sql = [operation getSql];
     NSArray* sqlArguments = [operation getSqlArguments];
     NSNumber* inTransaction = [operation getInTransactionArgument];
-    BOOL argumentsEmpty = [SqflitePlugin arrayIsEmpy:sqlArguments];
+    BOOL argumentsEmpty = [SqfliteSqlCipherPlugin arrayIsEmpy:sqlArguments];
     if (hasSqlLogLevel(database.logLevel)) {
         NSLog(@"%@ %@", sql, argumentsEmpty ? @"" : sqlArguments);
     }
@@ -317,7 +318,7 @@ static NSInteger _databaseOpenCount = 0;
 - (bool)query:(SqfliteDatabase*)database fmdb:(FMDatabase*)db operation:(SqfliteOperation*)operation {
     NSString* sql = [operation getSql];
     NSArray* sqlArguments = [operation getSqlArguments];
-    BOOL argumentsEmpty = [SqflitePlugin arrayIsEmpy:sqlArguments];
+    BOOL argumentsEmpty = [SqfliteSqlCipherPlugin arrayIsEmpy:sqlArguments];
     if (hasSqlLogLevel(database.logLevel)) {
         NSLog(@"%@ %@", sql, argumentsEmpty ? @"" : sqlArguments);
     }
@@ -340,7 +341,7 @@ static NSInteger _databaseOpenCount = 0;
     if (queryAsMapList) {
         NSMutableArray* results = [NSMutableArray new];
         while ([rs next]) {
-            [results addObject:[SqflitePlugin fromSqlDictionary:[rs resultDictionary]]];
+            [results addObject:[SqfliteSqlCipherPlugin fromSqlDictionary:[rs resultDictionary]]];
         }
         [operation success:results];
     } else {
@@ -362,7 +363,7 @@ static NSInteger _databaseOpenCount = 0;
             }
             NSMutableArray* row = [NSMutableArray new];
             for (int i = 0; i < columnCount; i++) {
-                [row addObject:[SqflitePlugin fromSqlValue:[rs objectForColumnIndex:i]]];
+                [row addObject:[SqfliteSqlCipherPlugin fromSqlValue:[rs objectForColumnIndex:i]]];
             }
             [rows addObject:row];
         }
@@ -595,10 +596,11 @@ static NSInteger _databaseOpenCount = 0;
 //
 - (void)handleOpenDatabaseCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString* path = call.arguments[_paramPath];
+    NSString* password = call.arguments[_paramPassword];
     NSNumber* readOnlyValue = call.arguments[_paramReadOnly];
     bool readOnly = [readOnlyValue boolValue] == true;
     NSNumber* singleInstanceValue = call.arguments[_paramSingleInstance];
-    bool inMemoryPath = [SqflitePlugin isInMemoryPath:path];
+    bool inMemoryPath = [SqfliteSqlCipherPlugin isInMemoryPath:path];
     // A single instance must be a regular database
     bool singleInstance = [singleInstanceValue boolValue] != false && !inMemoryPath;
     
@@ -617,7 +619,7 @@ static NSInteger _databaseOpenCount = 0;
                 if (_log) {
                     NSLog(@"re-opened %@singleInstance %@ id %@", database.inTransaction ? @"(in transaction) ": @"", path, database.databaseId);
                 }
-                result([SqflitePlugin makeOpenResult:database.databaseId recovered:true recoveredInTransaction:database.inTransaction]);
+                result([SqfliteSqlCipherPlugin makeOpenResult:database.databaseId recovered:true recoveredInTransaction:database.inTransaction]);
                 return;
             }
         }
@@ -645,6 +647,15 @@ static NSInteger _databaseOpenCount = 0;
                                    details:nil]);
         return;
     }
+
+    [queue inDatabase:^(FMDatabase *database) {
+        if (password == nil) {
+            [database setKey:@""];
+        } else {
+            [database setKey:password];
+        }
+        NSLog(@"Encryption is ready.");
+    }];
     
     NSNumber* databaseId;
     @synchronized (self.mapLock) {
@@ -669,7 +680,7 @@ static NSInteger _databaseOpenCount = 0;
         
     }
     
-    result([SqflitePlugin makeOpenResult: databaseId recovered:false recoveredInTransaction:false]);
+    result([SqfliteSqlCipherPlugin makeOpenResult: databaseId recovered:false recoveredInTransaction:false]);
 }
 
 //

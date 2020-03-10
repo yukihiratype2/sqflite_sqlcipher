@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import "SqfliteOperation.h"
-#import "SqflitePlugin.h"
+#import "SqfliteSqlCipherPlugin.h"
 
 // Abstract
 @implementation SqfliteOperation
@@ -50,7 +50,7 @@
 
 - (NSArray*)getSqlArguments {
     NSArray* arguments = [dictionary objectForKey:SqfliteParamSqlArguments];
-    return [SqflitePlugin toSqlArguments:arguments];
+    return [SqfliteSqlCipherPlugin toSqlArguments:arguments];
 }
 
 - (NSNumber*)getInTransactionArgument {
@@ -136,7 +136,7 @@
 
 - (NSArray*)getSqlArguments {
     NSArray* arguments = flutterMethodCall.arguments[SqfliteParamSqlArguments];
-    return [SqflitePlugin toSqlArguments:arguments];
+    return [SqfliteSqlCipherPlugin toSqlArguments:arguments];
 }
 
 - (NSNumber*)getInTransactionArgument {

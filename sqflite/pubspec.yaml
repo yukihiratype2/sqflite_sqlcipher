@@ -13,11 +13,11 @@ flutter:
     platforms:
       android:
         package: com.davidmartos96.sqflite_sqlcipher
-        pluginClass: SqflitePlugin
+        pluginClass: SqfliteSqlCipherPlugin
       ios:
-        pluginClass: SqflitePlugin
+        pluginClass: SqfliteSqlCipherPlugin
       macos:
-        pluginClass: SqflitePlugin
+        pluginClass: SqfliteSqlCipherPlugin
 
 
 dependencies:
