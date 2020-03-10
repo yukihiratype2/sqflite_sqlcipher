@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/sql.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_sqlcipher/sql.dart';
 
 import 'test_page.dart';
 

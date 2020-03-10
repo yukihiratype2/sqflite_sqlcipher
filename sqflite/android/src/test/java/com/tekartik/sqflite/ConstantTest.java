@@ -1,4 +1,4 @@
-package com.tekartik.sqflite;
+package com.davidmartos96.sqflite_sqlcipher;
 
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ public class ConstantTest {
 
     @Test
     public void key() {
-        assertEquals("com.tekartik.sqflite", Constant.PLUGIN_KEY);
+        assertEquals("com.davidmartos96.sqflite_sqlcipher", Constant.PLUGIN_KEY);
 
     }
 }

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 /// delete the db, create the folder and returnes its path
 Future<String> initDeleteDb(String dbName) async {

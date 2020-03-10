@@ -1,4 +1,4 @@
-package com.tekartik.sqflite;
+package com.davidmartos96.sqflite_sqlcipher;
 
 import org.junit.Test;
 

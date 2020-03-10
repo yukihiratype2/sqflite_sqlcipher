@@ -1,1 +1,1 @@
-export 'package:sqflite/src/constant.dart' hide methodSetDebugModeOn;
+export 'package:sqflite_sqlcipher/src/constant.dart' hide methodSetDebugModeOn;

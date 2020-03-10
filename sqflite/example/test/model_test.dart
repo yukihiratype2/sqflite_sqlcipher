@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_example/model/test.dart';
+import 'package:sqflite_sqlcipher_example/model/test.dart';
 
 void main() {
   group('model', () {

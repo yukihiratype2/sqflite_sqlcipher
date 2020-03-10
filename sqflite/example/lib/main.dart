@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_example/batch_test_page.dart';
-import 'package:sqflite_example/deprecated_test_page.dart';
-import 'package:sqflite_example/exception_test_page.dart';
-import 'package:sqflite_example/exp_test_page.dart';
-import 'package:sqflite_example/manual_test_page.dart';
-import 'package:sqflite_example/sqlcipher_test_page.dart';
-import 'package:sqflite_example/src/dev_utils.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_sqlcipher_example/batch_test_page.dart';
+import 'package:sqflite_sqlcipher_example/deprecated_test_page.dart';
+import 'package:sqflite_sqlcipher_example/exception_test_page.dart';
+import 'package:sqflite_sqlcipher_example/exp_test_page.dart';
+import 'package:sqflite_sqlcipher_example/manual_test_page.dart';
+import 'package:sqflite_sqlcipher_example/sqlcipher_test_page.dart';
+import 'package:sqflite_sqlcipher_example/src/dev_utils.dart';
 
 import 'model/main_item.dart';
 import 'open_test_page.dart';

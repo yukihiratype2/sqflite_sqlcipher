@@ -1,9 +1,9 @@
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/src/database_mixin.dart' as impl;
-import 'package:sqflite/src/factory_mixin.dart' as impl;
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_sqlcipher/src/database_mixin.dart' as impl;
+import 'package:sqflite_sqlcipher/src/factory_mixin.dart' as impl;
 
-import 'package:sqflite_example/utils.dart';
+import 'package:sqflite_sqlcipher_example/utils.dart';
 import 'package:test/test.dart';
 
 // ignore: deprecated_member_use

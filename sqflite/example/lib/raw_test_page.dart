@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_example/src/dev_utils.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_sqlcipher_example/src/dev_utils.dart';
 
 import 'test_page.dart';
 

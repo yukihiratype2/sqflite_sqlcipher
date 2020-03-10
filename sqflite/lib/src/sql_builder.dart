@@ -1,4 +1,4 @@
-import 'package:sqflite/src/value_utils.dart';
+import 'package:sqflite_sqlcipher/src/value_utils.dart';
 
 /// Insert/Update conflict resolver
 enum ConflictAlgorithm {

@@ -5,7 +5,7 @@ Future<void> main() async {
 
   await shell.run('''
 
-adb uninstall com.terkartik.sqfliteexample
+adb uninstall com.davidmartos96.sqflite_sqlcipherexample
 
 ''');
 }

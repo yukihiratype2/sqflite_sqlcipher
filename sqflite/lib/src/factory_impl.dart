@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/src/exception_impl.dart' as impl;
-import 'package:sqflite/src/factory.dart';
-import 'package:sqflite/src/factory_mixin.dart';
-import 'package:sqflite/src/sqflite_impl.dart' as impl;
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_sqlcipher/src/exception_impl.dart' as impl;
+import 'package:sqflite_sqlcipher/src/factory.dart';
+import 'package:sqflite_sqlcipher/src/factory_mixin.dart';
+import 'package:sqflite_sqlcipher/src/sqflite_impl.dart' as impl;
 
-export 'package:sqflite/src/open_options.dart';
+export 'package:sqflite_sqlcipher/src/open_options.dart';
 
 SqfliteDatabaseFactory _databaseFactory;
 

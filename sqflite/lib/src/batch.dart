@@ -1,9 +1,9 @@
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/database.dart';
-import 'package:sqflite/src/sql_builder.dart';
-import 'package:sqflite/src/transaction.dart';
-import 'package:sqflite/src/utils.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart';
+import 'package:sqflite_sqlcipher/src/database.dart';
+import 'package:sqflite_sqlcipher/src/sql_builder.dart';
+import 'package:sqflite_sqlcipher/src/transaction.dart';
+import 'package:sqflite_sqlcipher/src/utils.dart';
 
 /// Batch implementation
 abstract class SqfliteBatch implements Batch {

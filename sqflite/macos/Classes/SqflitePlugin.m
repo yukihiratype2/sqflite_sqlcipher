@@ -10,7 +10,7 @@
 #import <sqlite3.h>
 #import "SqfliteOperation.h"
 
-static NSString *const _channelName = @"com.tekartik.sqflite";
+static NSString *const _channelName = @"com.davidmartos96.sqflite_sqlcipher";
 static NSString *const _inMemoryPath = @":memory:";
 
 static NSString *const _methodGetPlatformVersion = @"getPlatformVersion";

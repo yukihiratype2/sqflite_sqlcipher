@@ -1,7 +1,7 @@
-name: sqflite
-homepage: https://github.com/tekartik/sqflite
+name: sqflite_sqlcipher
+homepage: https://github.com/davidmartos96/sqflite_sqlcipher
 description: Flutter plugin for SQLite, a self-contained, high-reliability,
-  embedded, SQL database engine.
+  embedded, SQL database engine. (SqlCipher support)
 version: 1.2.2+1
 
 environment:
@@ -12,7 +12,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.tekartik.sqflite
+        package: com.davidmartos96.sqflite_sqlcipher
         pluginClass: SqflitePlugin
       ios:
         pluginClass: SqflitePlugin

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.tekartik.sqfliteexample;
+package com.davidmartos96.sqflite_sqlcipherexample;
 
 import android.os.Bundle;
 
-import com.tekartik.sqflite.Constant;
-import com.tekartik.sqflite.SqflitePlugin;
+import com.davidmartos96.sqflite_sqlcipher.Constant;
+import com.davidmartos96.sqflite_sqlcipher.SqflitePlugin;
 
 import dev.flutter.plugins.e2e.E2EPlugin;
 import io.flutter.app.FlutterActivity;

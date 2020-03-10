@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/mixin/factory.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart';
+import 'package:sqflite_sqlcipher/src/mixin/factory.dart';
 
 void main() {
   group('mixin_factory', () {

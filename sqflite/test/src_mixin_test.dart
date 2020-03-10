@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
 
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/database.dart';
-import 'package:sqflite/src/mixin.dart';
-import 'package:sqflite/src/open_options.dart';
-import 'package:sqflite/utils/utils.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart';
+import 'package:sqflite_sqlcipher/src/database.dart';
+import 'package:sqflite_sqlcipher/src/mixin.dart';
+import 'package:sqflite_sqlcipher/src/open_options.dart';
+import 'package:sqflite_sqlcipher/utils/utils.dart';
 
 void main() {
   group('mixin_flutter', () {

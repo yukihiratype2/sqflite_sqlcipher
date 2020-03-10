@@ -1,4 +1,4 @@
-package com.tekartik.sqflite;
+package com.davidmartos96.sqflite_sqlcipher;
 
 import android.util.Log;
 
@@ -7,7 +7,7 @@ import net.sqlcipher.database.SQLiteDatabaseHook;
 import net.sqlcipher.DatabaseErrorHandler;
 import java.io.File;
 
-import static com.tekartik.sqflite.Constant.TAG;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.TAG;
 
 class Database {
     final boolean singleInstance;

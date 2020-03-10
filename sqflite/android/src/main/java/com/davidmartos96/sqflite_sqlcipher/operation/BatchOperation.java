@@ -1,4 +1,4 @@
-package com.tekartik.sqflite.operation;
+package com.davidmartos96.sqflite_sqlcipher.operation;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,12 +6,12 @@ import java.util.Map;
 
 import io.flutter.plugin.common.MethodChannel;
 
-import static com.tekartik.sqflite.Constant.PARAM_ERROR;
-import static com.tekartik.sqflite.Constant.PARAM_ERROR_CODE;
-import static com.tekartik.sqflite.Constant.PARAM_ERROR_DATA;
-import static com.tekartik.sqflite.Constant.PARAM_ERROR_MESSAGE;
-import static com.tekartik.sqflite.Constant.PARAM_METHOD;
-import static com.tekartik.sqflite.Constant.PARAM_RESULT;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.PARAM_ERROR;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.PARAM_ERROR_CODE;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.PARAM_ERROR_DATA;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.PARAM_ERROR_MESSAGE;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.PARAM_METHOD;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.PARAM_RESULT;
 
 /**
  * Created by alex on 09/01/18.

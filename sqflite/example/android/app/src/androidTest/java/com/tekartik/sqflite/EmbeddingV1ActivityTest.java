@@ -1,8 +1,8 @@
-package com.tekartik.sqflite;
+package com.davidmartos96.sqflite_sqlcipher;
 
 import androidx.test.rule.ActivityTestRule;
 
-import com.tekartik.sqfliteexample.EmbeddingV1Activity;
+import com.davidmartos96.sqflite_sqlcipherexample.EmbeddingV1Activity;
 
 import org.junit.Rule;
 import org.junit.runner.RunWith;

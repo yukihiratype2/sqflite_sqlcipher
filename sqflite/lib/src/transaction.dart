@@ -1,7 +1,7 @@
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/src/batch.dart';
-import 'package:sqflite/src/database.dart';
-import 'package:sqflite/src/database_mixin.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/batch.dart';
+import 'package:sqflite_sqlcipher/src/database.dart';
+import 'package:sqflite_sqlcipher/src/database_mixin.dart';
 
 /// Transaction implementation
 class SqfliteTransaction

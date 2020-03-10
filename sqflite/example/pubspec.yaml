@@ -1,4 +1,4 @@
-name: sqflite_example
+name: sqflite_sqlcipher_example
 description: Demonstrates how to use the sqflite plugin.
 publish_to: none
 version: '0.2.0'
@@ -12,7 +12,7 @@ dependencies:
   collection: any
   flutter:
     sdk: flutter
-  sqflite:
+  sqflite_sqlcipher:
     path: ../
 
 
@@ -49,5 +49,5 @@ flutter:
     - assets/issue_64.db
 
 dependency_overrides:
-  sqflite:
+  sqflite_sqlcipher:
     path: ../

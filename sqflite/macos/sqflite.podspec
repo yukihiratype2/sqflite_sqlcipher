@@ -3,15 +3,15 @@
 # Run `pod lib lint sqflite.podspec' to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'sqflite'
+  s.name             = 'sqflite_sqlcipher'
   s.version          = '0.0.1'
   s.summary          = 'SQLite plugin.'
   s.description      = <<-DESC
 Accss SQLite database.
                        DESC
-  s.homepage         = 'https://github.com/tekartik/sqflite'
+  s.homepage         = 'https://github.com/davidmartos96/sqflite_sqlcipher'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Tekartik' => 'alex@tekartik.com' }
+  s.author           = { 'David' => 'davidmartos96@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
   s.dependency 'FlutterMacOS'

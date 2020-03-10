@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/src/batch.dart';
-import 'package:sqflite/src/factory.dart';
-import 'package:sqflite/src/transaction.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/batch.dart';
+import 'package:sqflite_sqlcipher/src/factory.dart';
+import 'package:sqflite_sqlcipher/src/transaction.dart';
 
 /// Base database executor.
 abstract class SqfliteDatabaseExecutor implements DatabaseExecutor {

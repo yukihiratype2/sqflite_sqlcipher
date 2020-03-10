@@ -1,4 +1,4 @@
-package com.tekartik.sqflite.dev;
+package com.davidmartos96.sqflite_sqlcipher.dev;
 
 import android.util.Log;
 

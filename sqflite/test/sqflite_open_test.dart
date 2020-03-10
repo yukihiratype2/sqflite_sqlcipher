@@ -1,8 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
-const channel = MethodChannel('com.tekartik.sqflite');
+const channel = MethodChannel('com.davidmartos96.sqflite_sqlcipher');
 
 class MockMethodCall {
   String expectedMethod;

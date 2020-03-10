@@ -1,4 +1,4 @@
-package com.tekartik.sqflite.operation;
+package com.davidmartos96.sqflite_sqlcipher.operation;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;

@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/src/database.dart';
-import 'package:sqflite/src/mixin/factory.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/database.dart';
+import 'package:sqflite_sqlcipher/src/mixin/factory.dart';
 import 'package:synchronized/synchronized.dart';
 
 /// Internal database factory interface.

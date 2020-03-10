@@ -1,6 +1,6 @@
-package com.tekartik.sqflite.operation;
+package com.davidmartos96.sqflite_sqlcipher.operation;
 
-import com.tekartik.sqflite.SqlCommand;
+import com.davidmartos96.sqflite_sqlcipher.SqlCommand;
 
 import io.flutter.plugin.common.MethodChannel;
 

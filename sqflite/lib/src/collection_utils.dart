@@ -1,8 +1,8 @@
 import 'dart:collection';
 
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/constant.dart' as constant;
-import 'package:sqflite/src/exception.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart' as constant;
+import 'package:sqflite_sqlcipher/src/exception.dart';
 
 export 'dart:async';
 

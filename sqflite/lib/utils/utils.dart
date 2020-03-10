@@ -1,5 +1,5 @@
-import 'package:sqflite/src/utils.dart';
-import 'package:sqflite/src/utils.dart' as impl;
+import 'package:sqflite_sqlcipher/src/utils.dart';
+import 'package:sqflite_sqlcipher/src/utils.dart' as impl;
 
 /// helper to get the first int value in a query
 /// Useful for COUNT(*) queries

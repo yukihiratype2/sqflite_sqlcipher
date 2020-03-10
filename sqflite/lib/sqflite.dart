@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:sqflite/src/compat.dart';
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/factory_impl.dart' show databaseFactory;
-import 'package:sqflite/src/sqflite_impl.dart';
-import 'package:sqflite/src/utils.dart' as impl;
-import 'package:sqflite/utils/utils.dart' as utils;
+import 'package:sqflite_sqlcipher/src/compat.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart';
+import 'package:sqflite_sqlcipher/src/factory_impl.dart' show databaseFactory;
+import 'package:sqflite_sqlcipher/src/sqflite_impl.dart';
+import 'package:sqflite_sqlcipher/src/utils.dart' as impl;
+import 'package:sqflite_sqlcipher/utils/utils.dart' as utils;
 
 import 'sqlite_api.dart';
 
-export 'package:sqflite/sql.dart' show ConflictAlgorithm;
-export 'package:sqflite/src/compat.dart';
-export 'package:sqflite/src/factory_impl.dart' show databaseFactory;
+export 'package:sqflite_sqlcipher/sql.dart' show ConflictAlgorithm;
+export 'package:sqflite_sqlcipher/src/compat.dart';
+export 'package:sqflite_sqlcipher/src/factory_impl.dart' show databaseFactory;
 
 export 'sqlite_api.dart';
 

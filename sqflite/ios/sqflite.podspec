@@ -2,15 +2,15 @@
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
 #
 Pod::Spec.new do |s|
-  s.name             = 'sqflite'
+  s.name             = 'sqflite_sqlcipher'
   s.version          = '0.0.1'
-  s.summary          = 'SQLite plugin.'
+  s.summary          = 'SQLite plugin with SqlCipher support.'
   s.description      = <<-DESC
 Accss SQLite database.
                        DESC
-  s.homepage         = 'https://github.com/tekartik/sqflite'
+  s.homepage         = 'https://github.com/davidmartos96/sqflite_sqlcipher'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Tekartik' => 'alex@tekartik.com' }
+  s.author           = { 'David' => 'davidmartos96@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'

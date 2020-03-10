@@ -1,6 +1,6 @@
-import 'package:sqflite/src/services_impl.dart';
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/exception.dart';
+import 'package:sqflite_sqlcipher/src/services_impl.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart';
+import 'package:sqflite_sqlcipher/src/exception.dart';
 
 /// Wrap any exception to a [DatabastException]
 Future<T> wrapDatabaseException<T>(Future<T> Function() action) async {

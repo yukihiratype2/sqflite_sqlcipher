@@ -1,15 +1,15 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite/src/exception.dart';
-import 'package:sqflite/src/factory_impl.dart';
-import 'package:sqflite/src/mixin/factory.dart';
-import 'package:sqflite/src/sqflite_impl.dart';
+import 'package:sqflite_sqlcipher/src/exception.dart';
+import 'package:sqflite_sqlcipher/src/factory_impl.dart';
+import 'package:sqflite_sqlcipher/src/mixin/factory.dart';
+import 'package:sqflite_sqlcipher/src/sqflite_impl.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('sqflite', () {
-    const channel = MethodChannel('com.tekartik.sqflite');
+    const channel = MethodChannel('com.davidmartos96.sqflite_sqlcipher');
 
     final log = <MethodCall>[];
     String response;

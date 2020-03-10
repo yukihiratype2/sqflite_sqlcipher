@@ -5,11 +5,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/src/database_mixin.dart' show SqfliteDatabaseMixin;
-import 'package:sqflite/src/factory_mixin.dart'
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_sqlcipher/src/database_mixin.dart' show SqfliteDatabaseMixin;
+import 'package:sqflite_sqlcipher/src/factory_mixin.dart'
     show SqfliteDatabaseFactoryMixin;
-import 'package:sqflite_example/src/dev_utils.dart';
+import 'package:sqflite_sqlcipher_example/src/dev_utils.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'test_page.dart';

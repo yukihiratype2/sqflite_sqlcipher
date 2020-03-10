@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:sqflite/src/env_utils.dart';
+import 'package:sqflite_sqlcipher/src/env_utils.dart';
 
 /// Don't throw exception yet. will be done in the future.
 var checkThrowException = false;

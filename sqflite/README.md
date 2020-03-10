@@ -1,4 +1,4 @@
-# sqflite
+# sqflite_sqlcipher
 
 [![pub package](https://img.shields.io/pub/v/sqflite.svg)](https://pub.dev/packages/sqflite)
 [![Build Status](https://travis-ci.org/tekartik/sqflite.svg?branch=master)](https://travis-ci.org/tekartik/sqflite)
@@ -19,7 +19,7 @@ In your flutter project add the dependency:
 ```yml
 dependencies:
   ...
-  sqflite: ^1.2.2
+  sqflite_sqlcipher: ^1.2.2
 ```
 
 For help getting started with Flutter, view the online
@@ -32,7 +32,7 @@ For help getting started with Flutter, view the online
 Import `sqflite.dart`
 
 ```dart
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 ```
 
 ### Opening a database

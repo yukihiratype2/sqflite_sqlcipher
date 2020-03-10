@@ -1,4 +1,4 @@
-group 'com.tekartik.sqflite'
+group 'com.davidmartos96.sqflite_sqlcipher'
 version '1.0-SNAPSHOT'
 
 buildscript {

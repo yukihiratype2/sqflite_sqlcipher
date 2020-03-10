@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:path/path.dart';
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/database.dart';
-import 'package:sqflite/src/database_mixin.dart';
-import 'package:sqflite/src/exception.dart';
-import 'package:sqflite/src/factory.dart';
-import 'package:sqflite/src/mixin/factory.dart';
-import 'package:sqflite/src/open_options.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/constant.dart';
+import 'package:sqflite_sqlcipher/src/database.dart';
+import 'package:sqflite_sqlcipher/src/database_mixin.dart';
+import 'package:sqflite_sqlcipher/src/exception.dart';
+import 'package:sqflite_sqlcipher/src/factory.dart';
+import 'package:sqflite_sqlcipher/src/mixin/factory.dart';
+import 'package:sqflite_sqlcipher/src/open_options.dart';
 import 'package:synchronized/synchronized.dart';
 
 /// Base factory implementation

@@ -1,8 +1,8 @@
-package com.tekartik.sqflite;
+package com.davidmartos96.sqflite_sqlcipher;
 
 import android.util.Log;
 
-import com.tekartik.sqflite.dev.Debug;
+import com.davidmartos96.sqflite_sqlcipher.dev.Debug;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.tekartik.sqflite.Constant.TAG;
+import static com.davidmartos96.sqflite_sqlcipher.Constant.TAG;
 
 public class SqlCommand {
     public String getSql() {

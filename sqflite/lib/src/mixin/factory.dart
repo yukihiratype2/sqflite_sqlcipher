@@ -1,5 +1,5 @@
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/src/factory_mixin.dart';
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/factory_mixin.dart';
 
 /// Mixin handler
 abstract class SqfliteInvokeHandler {
