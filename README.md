@@ -2,25 +2,27 @@
 
 This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).  **Up to date with version 1.2.2+1**
 
-This fork adds an optional parameter "password" to open encrypted databases. Everything else behaves like the `sqflite` plugin, same API.
+This fork uses the Dart implementation of `sqflite` but with a different native implementation which uses the SqlCipher library on both iOS and Android. 
 
 The SQLCipher version of the plugin is 4.10. If you try to open a database encrypted with a lower version of SQLCipher, the plugin will try to migrate it to a new version using the operation `PRAGMA cipher_migrate` (This automatic migration to version 4 is only done in Android. PR welcome for this feature in iOS).
 
-### Install
+### Install and use
 
 To add it in your project include this in the `pubspec.yml`.
 ```
 dependencies:
-  sqflite: (whichever since it will be overriden with this fork)
-
-dependency_overrides:
-  sqflite:
-    git:
-      url: https://www.github.com/davidmartos96/sqflite_sqlcipher.git
-      path: sqflite
-      ref: 50a4ac06b323e1ce3d0cd055125a6f4a7454f2d5
+  sqflite_sqlcipher: {latest version}
 ```
-Dependency overrides are used to avoid conflict with other projects that depend on "normal" sqflite. For example https://github.com/renefloor/flutter_cache_manager
+
+```dart
+import 'package:sqflite_sqlcipher/sqflite.dart';
+
+Database db = await openDatabase(
+  path,
+  password: "my password",
+  // onCreate, onUpgrade...
+);
+```
 
 ### iOS
 **REQUIRED:** Include this in your iOS `Podfile`
