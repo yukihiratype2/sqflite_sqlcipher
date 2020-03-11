@@ -32,7 +32,8 @@ pod 'SQLCipher', '~>4.1.0'
 If you try to use a database encrypted with a SqlCipher version lower than 4, the version in the Podfile can be changed to a lower one `'~>3.4.2'`. But note that if doing that, the running database on Android will be version 4 (since it migrates automatically) and on iOS will be version 3.
 
 ### Android
-If using ProGuard, add the following rules:
+**REQUIRED:** Flutter now enables code shrinking by default when building an APK in release mode, so you need to add the following ProGuard rules to the file `android/app/proguard-rules.pro`. If it does not exist, create it:
+
 ```
 -keep class net.sqlcipher.** { *; }
 ```
