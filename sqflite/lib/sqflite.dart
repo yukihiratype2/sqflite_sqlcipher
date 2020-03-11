@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:sqflite_sqlcipher/src/compat.dart';
-import 'package:sqflite_sqlcipher/src/constant.dart';
-import 'package:sqflite_sqlcipher/src/factory_impl.dart' show databaseFactory;
-import 'package:sqflite_sqlcipher/src/sqflite_impl.dart';
-import 'package:sqflite_sqlcipher/src/utils.dart' as impl;
-import 'package:sqflite_sqlcipher/utils/utils.dart' as utils;
+import 'package:sqflite/sqflite.dart' hide Sqflite, databaseFactory;
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
+import 'package:sqflite/utils/utils.dart' as utils;
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/factory_sql_cipher_impl.dart'
+    show databaseFactory;
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart';
+import 'package:sqflite_sqlcipher/src/sqflite_sql_cipher_impl.dart';
 
-import 'sqlite_api.dart';
-
-export 'package:sqflite_sqlcipher/sql.dart' show ConflictAlgorithm;
-export 'package:sqflite_sqlcipher/src/compat.dart';
-export 'package:sqflite_sqlcipher/src/factory_impl.dart' show databaseFactory;
+export 'package:sqflite/sqflite.dart' hide Sqflite, databaseFactory;
+export 'package:sqflite_sqlcipher/src/factory_sql_cipher_impl.dart'
+    show databaseFactory;
 
 export 'sqlite_api.dart';
 
@@ -141,7 +141,7 @@ Future<Database> openDatabase(String path,
     String password,
     bool readOnly = false,
     bool singleInstance = true}) {
-  final options = OpenDatabaseOptions(
+  final options = SqlCipherOpenDatabaseOptions(
       version: version,
       onConfigure: onConfigure,
       onCreate: onCreate,

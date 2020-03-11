@@ -7,7 +7,9 @@ import 'package:sqflite_sqlcipher_example/open_test_page.dart';
 
 import 'test_page.dart';
 
+/// Cipher test page.
 class SqlCipherTestPage extends TestPage {
+  /// Cipher test page.
   SqlCipherTestPage() : super("SqlCipher tests") {
     test('Open and query database', () async {
       String path = await initDeleteDb("encrypted.db");
@@ -59,7 +61,8 @@ class SqlCipherTestPage extends TestPage {
       } catch (_) {}
 
       // Copy from asset
-      ByteData data = await rootBundle.load(join("assets", "example_pass_1234.db"));
+      ByteData data =
+          await rootBundle.load(join("assets", "example_pass_1234.db"));
       List<int> bytes =
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
       // Write and flush the bytes written

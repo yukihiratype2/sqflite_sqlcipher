@@ -54,8 +54,8 @@ MockScenario startScenario(List<List> data) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('sqflite', () {
-    test('open', () async {
+  group('sqflite_sql_cipher', () {
+    test('open no password', () async {
       final scenario = startScenario([
         [
           'openDatabase',
@@ -72,11 +72,15 @@ void main() {
       await db.close();
       scenario.end();
     });
-    test('open with version', () async {
+    test('open with version and password', () async {
       final scenario = startScenario([
         [
           'openDatabase',
-          {'path': ':memory:', 'singleInstance': true},
+          {
+            'path': ':memory:',
+            'singleInstance': true,
+            'password': 'my_password'
+          },
           1
         ],
         [
@@ -111,7 +115,7 @@ void main() {
         ],
       ]);
       final db = await openDatabase(inMemoryDatabasePath,
-          version: 1, onCreate: (db, version) {});
+          password: 'my_password', version: 1, onCreate: (db, version) {});
       await db.close();
       scenario.end();
     });

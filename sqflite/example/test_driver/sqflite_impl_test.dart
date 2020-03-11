@@ -1,7 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
-import 'package:sqflite_sqlcipher/src/database_mixin.dart' as impl;
-import 'package:sqflite_sqlcipher/src/factory_mixin.dart' as impl;
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
 
 import 'package:sqflite_sqlcipher_example/utils.dart';
 import 'package:test/test.dart';

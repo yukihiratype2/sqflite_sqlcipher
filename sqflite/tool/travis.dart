@@ -15,8 +15,6 @@ flutter test --no-pub --coverage
 
 ''');
 
-  await run('dart test/no_flutter_main.dart', verbose: false);
-
   // CODECOV_TOKEN must be defined on travis
   final codeCovToken = userEnvironment['CODECOV_TOKEN'];
   final dartVersion = userEnvironment['TRAVIS_DART_VERSION'];

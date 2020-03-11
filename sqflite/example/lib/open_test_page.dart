@@ -6,9 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
-import 'package:sqflite_sqlcipher/src/database_mixin.dart' show SqfliteDatabaseMixin;
-import 'package:sqflite_sqlcipher/src/factory_mixin.dart'
-    show SqfliteDatabaseFactoryMixin;
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart'
+    show SqfliteDatabaseMixin, SqfliteDatabaseFactoryMixin;
 import 'package:sqflite_sqlcipher_example/src/dev_utils.dart';
 import 'package:synchronized/synchronized.dart';
 

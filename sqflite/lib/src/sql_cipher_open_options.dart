@@ -4,9 +4,10 @@ import 'package:sqflite_sqlcipher/sqlite_api.dart';
 /// Options to open a database
 /// See [openDatabase] for details
 ///
-class SqfliteOpenDatabaseOptions implements OpenDatabaseOptions {
+class SqfliteSqlCipherOpenDatabaseOptions
+    implements SqlCipherOpenDatabaseOptions {
   /// See [openDatabase] for details
-  SqfliteOpenDatabaseOptions({
+  SqfliteSqlCipherOpenDatabaseOptions({
     this.version,
     this.onConfigure,
     this.onCreate,

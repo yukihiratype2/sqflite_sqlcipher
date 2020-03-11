@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sqflite/utils/utils.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
-import 'package:sqflite_sqlcipher/src/factory_mixin.dart' as impl;
-import 'package:sqflite_sqlcipher/utils/utils.dart';
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
 import 'package:sqflite_sqlcipher_example/model/item.dart';
 import 'package:sqflite_sqlcipher_example/src/item_widget.dart';
 import 'package:sqflite_sqlcipher_example/utils.dart';

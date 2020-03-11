@@ -105,8 +105,9 @@ class _MyAppState extends State<MyApp> {
 class MyHomePage extends StatefulWidget {
   /// App home menu page.
   MyHomePage({Key key, this.title}) : super(key: key) {
-    _items.add(
-        MainItem("Sqlcipher tests", "Simple tests with an encrypted database", route: testSqlCipherRoute));
+    _items.add(MainItem(
+        "Sqlcipher tests", "Simple tests with an encrypted database",
+        route: testSqlCipherRoute));
     _items.add(
         MainItem("Raw tests", "Raw SQLite operations", route: testRawRoute));
     _items.add(MainItem("Open tests", "Open onCreate/onUpgrade/onDowngrade",
