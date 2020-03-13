@@ -2,4 +2,4 @@
 // * [ConflictAlgorithm]
 // * [escapeName]
 // * [unescapeName]
-export 'package:sqflite/sql.dart';
+export 'package:sqflite_common/sql.dart';

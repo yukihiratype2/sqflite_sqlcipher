@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sqflite/utils/utils.dart';
+import 'package:sqflite_common/utils/utils.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
 import 'package:sqflite_sqlcipher_example/model/item.dart';
@@ -67,24 +67,24 @@ class _ManualTestPageState extends State<ManualTestPage> {
       },
           summary:
               'Try open (then optionally) delete, exit or hot-restart then delete then open'),
-      MenuItem('log level: none', () async {
-        // ignore: deprecated_member_use
-        await Sqflite.devSetOptions(
-            // ignore: deprecated_member_use
-            SqfliteOptions(logLevel: sqfliteLogLevelNone));
-      }, summary: 'No logs'),
-      MenuItem('log level: sql', () async {
-        // ignore: deprecated_member_use
-        await Sqflite.devSetOptions(
-            // ignore: deprecated_member_use
-            SqfliteOptions(logLevel: sqfliteLogLevelSql));
-      }, summary: 'Log sql command and basic database operation'),
-      MenuItem('log level: verbose', () async {
-        // ignore: deprecated_member_use
-        await Sqflite.devSetOptions(
-            // ignore: deprecated_member_use
-            SqfliteOptions(logLevel: sqfliteLogLevelVerbose));
-      }, summary: 'Verbose logs, for debugging'),
+      // MenuItem('log level: none', () async {
+      //   // ignore: deprecated_member_use
+      //   await Sqflite.devSetOptions(
+      //       // ignore: deprecated_member_use
+      //       SqfliteOptions(logLevel: sqfliteLogLevelNone));
+      // }, summary: 'No logs'),
+      // MenuItem('log level: sql', () async {
+      //   // ignore: deprecated_member_use
+      //   await Sqflite.devSetOptions(
+      //       // ignore: deprecated_member_use
+      //       SqfliteOptions(logLevel: sqfliteLogLevelSql));
+      // }, summary: 'Log sql command and basic database operation'),
+      // MenuItem('log level: verbose', () async {
+      //   // ignore: deprecated_member_use
+      //   await Sqflite.devSetOptions(
+      //       // ignore: deprecated_member_use
+      //       SqfliteOptions(logLevel: sqfliteLogLevelVerbose));
+      // }, summary: 'Verbose logs, for debugging'),
       MenuItem('Get info', () async {
         final factory = databaseFactory as impl.SqfliteDatabaseFactoryMixin;
         var info = await factory.getDebugInfo();

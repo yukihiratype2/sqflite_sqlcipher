@@ -1,15 +1,13 @@
 import 'dart:async';
 
-import 'package:sqflite/sqflite.dart' hide Sqflite, databaseFactory;
 import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
-import 'package:sqflite/utils/utils.dart' as utils;
+import 'package:sqflite_common/utils/utils.dart' as utils;
 import 'package:sqflite_sqlcipher/sqlite_api.dart';
 import 'package:sqflite_sqlcipher/src/factory_sql_cipher_impl.dart'
     show databaseFactory;
 import 'package:sqflite_sqlcipher/src/sqflite_import.dart';
 import 'package:sqflite_sqlcipher/src/sqflite_sql_cipher_impl.dart';
 
-export 'package:sqflite/sqflite.dart' hide Sqflite, databaseFactory;
 export 'package:sqflite_sqlcipher/src/factory_sql_cipher_impl.dart'
     show databaseFactory;
 
@@ -45,13 +43,6 @@ class Sqflite {
   static Future<void> devSetDebugModeOn([bool on = true]) {
     impl.debugModeOn = on;
     return setDebugModeOn(on);
-  }
-
-  // Testing only
-  /// deprecated on purpose to remove from code.
-  @deprecated
-  static Future<void> devSetOptions(SqfliteOptions options) async {
-    await invokeMethod<dynamic>(methodOptions, options.toMap());
   }
 
   @deprecated

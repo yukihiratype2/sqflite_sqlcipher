@@ -14,6 +14,7 @@ dependencies:
     sdk: flutter
   sqflite_sqlcipher:
     path: ../
+  synchronized: ^2.2.0
 
 
 dev_dependencies:

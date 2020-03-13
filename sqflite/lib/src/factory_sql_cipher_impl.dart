@@ -1,4 +1,4 @@
-import 'package:sqflite/sqlite_api.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_sqlcipher/src/database_sql_cipher_impl.dart';
 
 import 'sqflite_import.dart';

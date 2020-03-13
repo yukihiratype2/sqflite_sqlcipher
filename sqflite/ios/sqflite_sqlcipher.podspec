@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.version          = '0.0.1'
   s.summary          = 'SQLite plugin with SqlCipher support.'
   s.description      = <<-DESC
-Accss SQLite database.
+Access SQLite database.
                        DESC
   s.homepage         = 'https://github.com/davidmartos96/sqflite_sqlcipher'
   s.license          = { :file => '../LICENSE' }

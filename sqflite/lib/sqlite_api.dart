@@ -1,7 +1,7 @@
-import 'package:sqflite/sqlite_api.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_sqlcipher/src/sql_cipher_open_options.dart' as impl;
 
-export 'package:sqflite/sqlite_api.dart';
+export 'package:sqflite_common/sqlite_api.dart';
 
 ///
 /// Options for opening the database

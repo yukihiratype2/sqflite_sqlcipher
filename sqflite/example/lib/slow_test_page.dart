@@ -76,19 +76,19 @@ class SlowTestPage extends TestPage {
     });
 
     if (Platform.isAndroid) {
-      test('Perf android NORMAL_PRIORITY', () async {
-        // ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package
-        await Sqflite.devSetOptions(
-            SqfliteOptions()..androidThreadPriority = 0);
-        try {
-          await perfInsert();
-          await perfDo(count);
-        } finally {
-          // Background priority
-          await Sqflite.devSetOptions(
-              SqfliteOptions()..androidThreadPriority = 10);
-        }
-      });
+      //   test('Perf android NORMAL_PRIORITY', () async {
+      //     // ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package
+      //     await Sqflite.devSetOptions(
+      //         SqfliteOptions()..androidThreadPriority = 0);
+      //     try {
+      //       await perfInsert();
+      //       await perfDo(count);
+      //     } finally {
+      //       // Background priority
+      //       await Sqflite.devSetOptions(
+      //           SqfliteOptions()..androidThreadPriority = 10);
+      //     }
+      //   });
     }
   }
 
