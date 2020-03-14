@@ -447,19 +447,12 @@ class RawTestPage extends TestPage {
         await db
             .execute('CREATE TABLE Test (name TEXT PRIMARY KEY) WITHOUT ROWID');
         var id = await db.insert('Test', {'name': 'test'});
-        // it seems to always return 1 on Android, 0 on iOS...
-        if (Platform.isIOS || Platform.isMacOS) {
-          expect(id, 0);
-        } else {
-          expect(id, 1);
-        }
+
+        expect(id, 0);
+
         id = await db.insert('Test', {'name': 'other'});
-        // it seems to always return 1
-        if (Platform.isIOS || Platform.isMacOS) {
-          expect(id, 0);
-        } else {
-          expect(id, 1);
-        }
+        expect(id, 0);
+
         // notice the order is based on the primary key
         var list = await db.query('Test');
         expect(list, [

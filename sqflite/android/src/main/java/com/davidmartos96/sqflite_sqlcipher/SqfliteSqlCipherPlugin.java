@@ -3,11 +3,11 @@ package com.davidmartos96.sqflite_sqlcipher;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteCantOpenDatabaseException;
-import net.sqlcipher.database.SQLiteDatabase;
-import net.sqlcipher.database.SQLiteDatabaseHook;
 
+import net.sqlcipher.SQLException;
+import net.sqlcipher.database.SQLiteDatabase;
+
+import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -635,6 +635,12 @@ public class SqfliteSqlCipherPlugin implements FlutterPlugin, MethodCallHandler 
         if (exception instanceof SQLiteCantOpenDatabaseException) {
             operation.error(Constant.SQLITE_ERROR, Constant.ERROR_OPEN_FAILED + " " + database.path, null);
             return;
+        } else if (exception.getMessage().toLowerCase().contains("could not open database")) {
+            operation.error(Constant.SQLITE_ERROR, Constant.ERROR_OPEN_FAILED + " " + database.path, null);
+            return;
+        } else if (exception.getMessage().toLowerCase().contains("file is not a database")) {
+            operation.error(Constant.SQLITE_ERROR, Constant.ERROR_OPEN_FAILED + " " + database.path, null);
+            return;
         } else if (exception instanceof SQLException) {
             operation.error(Constant.SQLITE_ERROR, exception.getMessage(), SqlErrorInfo.getMap(operation));
             return;
@@ -712,7 +718,7 @@ public class SqfliteSqlCipherPlugin implements FlutterPlugin, MethodCallHandler 
     //
     // Sqflite.open
     //
-   
+
     private void onOpenDatabaseCall(final MethodCall call, Result result) {
         final String path = call.argument(PARAM_PATH);
         final Boolean readOnly = call.argument(PARAM_READ_ONLY);
