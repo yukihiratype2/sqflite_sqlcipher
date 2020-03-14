@@ -37,7 +37,7 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        applicationId "com.davidmartos96.sqflite_sqlcipherexample"
+        applicationId "com.davidmartos96.example"
     }
 
     buildTypes {
