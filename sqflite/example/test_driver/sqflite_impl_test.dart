@@ -5,17 +5,6 @@ import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
 import 'package:sqflite_sqlcipher_example/utils.dart';
 import 'package:test/test.dart';
 
-// ignore: deprecated_member_use
-class TestSqfliteOptions extends SqfliteOptions {}
-
-@deprecated
-Future devVerbose() async {
-  // ignore: deprecated_member_use
-  await Sqflite.devSetOptions(
-      // ignore: deprecated_member_use
-      SqfliteOptions()..logLevel = sqfliteLogLevelVerbose);
-}
-
 void main() {
   final factory = databaseFactory as impl.SqfliteDatabaseFactoryMixin;
   group('impl', () {
@@ -90,56 +79,6 @@ void main() {
             print('Sqflite closing again');
             await db3.close();
           }
-        });
-
-        test('logLevel', () async {
-          var path = 'log_level.db';
-          await deleteDatabase(path);
-
-          // ignore: deprecated_member_use
-          await Sqflite.devSetOptions(
-              // ignore: deprecated_member_use
-              SqfliteOptions()..logLevel = sqfliteLogLevelNone);
-
-          var db = await openDatabase(path);
-          var info = await factory.getDebugInfo();
-
-          expect(info.databases.length, 1);
-          var dbInfo = info.databases.values.first;
-          expect(dbInfo.singleInstance, isTrue);
-          expect(dbInfo.path, join(await factory.getDatabasesPath(), path));
-          expect(dbInfo.logLevel, isNull);
-          await db.close();
-
-          // ignore: deprecated_member_use
-          await Sqflite.devSetOptions(
-              // ignore: deprecated_member_use
-              SqfliteOptions()..logLevel = sqfliteLogLevelVerbose);
-          info = await factory.getDebugInfo();
-          expect(info.logLevel, sqfliteLogLevelVerbose);
-
-          db = await openDatabase(path);
-          // ignore: deprecated_member_use
-          await Sqflite.devSetOptions(
-              // ignore: deprecated_member_use
-              SqfliteOptions()..logLevel = sqfliteLogLevelNone);
-
-          try {
-            info = await factory.getDebugInfo();
-            expect(int.parse(info.databases.keys.first), isNotNull);
-            // The id is a number
-            expect(info.databases.length, 1);
-            var dbInfo = info.databases.values.first;
-            expect(dbInfo.singleInstance, isTrue);
-            expect(dbInfo.path, join(await factory.getDatabasesPath(), path));
-            expect(dbInfo.logLevel, sqfliteLogLevelVerbose);
-          } finally {
-            await db?.close();
-          }
-
-          info = await factory.getDebugInfo();
-          expect(info.databases, isNull);
-          expect(info.logLevel, isNull);
         });
       });
     }
