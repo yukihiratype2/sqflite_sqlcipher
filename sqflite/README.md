@@ -1,8 +1,10 @@
 # sqflite_sqlcipher
 
-This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).  **Up to date with version 1.2.2+1**
+This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).
 
-This fork uses the Dart implementation of `sqflite` but with a different native implementation which uses the SqlCipher library on both iOS and Android. 
+ **[sqflite_common version 1.0.0](https://pub.dev/packages/sqflite_common)**
+
+This fork makes use of the Dart package `sqflite_common` but with a native implementation which uses the SqlCipher library on both iOS and Android. The API is the same as the `sqflite` plugin, only that the `openDatabase` method includes an optional parameter `password`. 
 
 The SQLCipher version of the plugin is 4.10. If you try to open a database encrypted with a lower version of SQLCipher, the plugin will try to migrate it to a new version using the operation `PRAGMA cipher_migrate` (This automatic migration to version 4 is only done in Android. PR welcome for this feature in iOS).
 
@@ -23,13 +25,6 @@ Database db = await openDatabase(
   // onCreate, onUpgrade...
 );
 ```
-
-### iOS
-**REQUIRED:** Include this in your iOS `Podfile`
-```
-pod 'SQLCipher', '~>4.1.0'
-```
-If you try to use a database encrypted with a SqlCipher version lower than 4, the version in the Podfile can be changed to a lower one `'~>3.4.2'`. But note that if doing that, the running database on Android will be version 4 (since it migrates automatically) and on iOS will be version 3.
 
 ### Android
 **REQUIRED:** Flutter now enables code shrinking by default when building an APK in release mode, so you need to add the following ProGuard rules to the file `android/app/proguard-rules.pro`. If it does not exist, create it:
