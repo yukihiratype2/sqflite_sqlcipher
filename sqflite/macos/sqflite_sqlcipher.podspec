@@ -1,13 +1,12 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint sqflite.podspec' to validate before publishing.
 #
 Pod::Spec.new do |s|
   s.name             = 'sqflite_sqlcipher'
   s.version          = '0.0.1'
-  s.summary          = 'SQLite plugin.'
+  s.summary          = 'SQLite plugin with SqlCipher support.'
   s.description      = <<-DESC
-Accss SQLite database.
+Access SQLite database.
                        DESC
   s.homepage         = 'https://github.com/davidmartos96/sqflite_sqlcipher'
   s.license          = { :file => '../LICENSE' }
@@ -15,7 +14,7 @@ Accss SQLite database.
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
   s.dependency 'FlutterMacOS'
-  s.dependency 'FMDB', '~> 2.7.2'
+  s.dependency 'FMDB/SQLCipher', '~> 2.7.5'
 
   s.platform = :osx, '10.11'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
