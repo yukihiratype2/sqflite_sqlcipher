@@ -6,7 +6,7 @@ This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).
 
 This fork makes use of the Dart package `sqflite_common` but with a native implementation which uses the SqlCipher library on both iOS and Android. The API is the same as the `sqflite` plugin, only that the `openDatabase` method includes an optional parameter `password`. 
 
-The SQLCipher version of the plugin is 4.10. If you try to open a database encrypted with a lower version of SQLCipher, the plugin will try to migrate it to a new version using the operation `PRAGMA cipher_migrate` (This automatic migration to version 4 is only done in Android. PR welcome for this feature in iOS).
+The SQLCipher version of the plugin is 4.3.0 If you try to open a database encrypted with a lower version of SQLCipher, the plugin will try to migrate it to a new version using the operation `PRAGMA cipher_migrate` (This automatic migration to version 4 is only done in Android. PR welcome for this feature in iOS).
 
 ### Install and use
 
