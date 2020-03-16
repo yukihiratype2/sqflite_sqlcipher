@@ -33,6 +33,23 @@ Database db = await openDatabase(
 -keep class net.sqlcipher.** { *; }
 ```
 
+### If using `sqflite` as direct or transitive dependency
+
+If any of your project's dependencies uses sqflite (e.g: cached_network_image, flutter_cache_manager...), then for iOS to link correctly the SQLCipher libraries you need to override it in your `pubspec.yaml` file:
+
+```yaml
+dependency_overrides:
+  sqflite:
+    git:
+      url: https://www.github.com/davidmartos96/sqflite_sqlcipher.git
+      path: sqflite
+      ref: fmdb_override
+```
+
+The reason for this is that in iOS, the `FMDB` and `FMDB/SQLCipher` pods cannot be used at the same time. The override only changes that reference. The rest is the full `sqflite` package. 
+If anyone knows about a better way to handle this, PRs are welcome :D
+
+
 ---
 
 ## Sqflite documentation
