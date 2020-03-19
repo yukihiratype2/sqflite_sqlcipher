@@ -1,5 +1,7 @@
 # sqflite_sqlcipher
 
+[![pub package](https://img.shields.io/pub/v/sqflite_sqlcipher.svg)](https://pub.dev/packages/sqflite_sqlcipher)
+
 This is a fork from the plugin [sqflite](https://github.com/tekartik/sqflite).
 
  **[sqflite_common version 1.0.0](https://pub.dev/packages/sqflite_common)**
