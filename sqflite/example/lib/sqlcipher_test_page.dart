@@ -14,8 +14,6 @@ class SqlCipherTestPage extends TestPage {
     test('Open and query database', () async {
       String path = await initDeleteDb("encrypted.db");
 
-      expect(await isDatabase(path), isFalse);
-
       const String password = "1234";
 
       Database db = await openDatabase(
@@ -75,6 +73,36 @@ class SqlCipherTestPage extends TestPage {
       List<Map<String, dynamic>> list = await db.rawQuery("SELECT * FROM Test");
       print("list $list");
       expect(list.first["name"], "simple value");
+
+      await db.close();
+    });
+    test("Open asset database (SQLCipher 3.x, cipher_migrate on Android)",
+        () async {
+      var databasesPath = await getDatabasesPath();
+      String path = join(databasesPath, "asset_example_3x.db");
+
+      // delete existing if any
+      await deleteDatabase(path);
+
+      // Make sure the parent directory exists
+      try {
+        await Directory(dirname(path)).create(recursive: true);
+      } catch (_) {}
+
+      // Copy from asset
+      ByteData data =
+          await rootBundle.load(join("assets", "sqlcipher-3.0-testkey.db"));
+      List<int> bytes =
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      // Write and flush the bytes written
+      await File(path).writeAsBytes(bytes, flush: true);
+
+      // open the database
+      Database db = await openDatabase(path, password: "testkey");
+
+      // Our database as a single table with a single element
+      List<Map<String, dynamic>> list = await db.rawQuery("SELECT * FROM t1");
+      expect(list.length, greaterThan(0));
 
       await db.close();
     });
