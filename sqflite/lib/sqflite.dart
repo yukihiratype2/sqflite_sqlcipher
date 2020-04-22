@@ -1,17 +1,15 @@
 import 'dart:async';
 
-import 'package:sqflite/src/compat.dart';
-import 'package:sqflite/src/constant.dart';
-import 'package:sqflite/src/factory_impl.dart' show databaseFactory;
-import 'package:sqflite/src/sqflite_impl.dart';
-import 'package:sqflite/src/utils.dart' as impl;
-import 'package:sqflite/utils/utils.dart' as utils;
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
+import 'package:sqflite_common/utils/utils.dart' as utils;
+import 'package:sqflite_sqlcipher/sqlite_api.dart';
+import 'package:sqflite_sqlcipher/src/factory_sql_cipher_impl.dart'
+    show databaseFactory;
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart';
+import 'package:sqflite_sqlcipher/src/sqflite_sql_cipher_impl.dart';
 
-import 'sqlite_api.dart';
-
-export 'package:sqflite/sql.dart' show ConflictAlgorithm;
-export 'package:sqflite/src/compat.dart';
-export 'package:sqflite/src/factory_impl.dart' show databaseFactory;
+export 'package:sqflite_sqlcipher/src/factory_sql_cipher_impl.dart'
+    show databaseFactory;
 
 export 'sqlite_api.dart';
 
@@ -45,13 +43,6 @@ class Sqflite {
   static Future<void> devSetDebugModeOn([bool on = true]) {
     impl.debugModeOn = on;
     return setDebugModeOn(on);
-  }
-
-  // Testing only
-  /// deprecated on purpose to remove from code.
-  @deprecated
-  static Future<void> devSetOptions(SqfliteOptions options) async {
-    await invokeMethod<dynamic>(methodOptions, options.toMap());
   }
 
   @deprecated
@@ -141,7 +132,7 @@ Future<Database> openDatabase(String path,
     String password,
     bool readOnly = false,
     bool singleInstance = true}) {
-  final options = OpenDatabaseOptions(
+  final options = SqlCipherOpenDatabaseOptions(
       version: version,
       onConfigure: onConfigure,
       onCreate: onCreate,

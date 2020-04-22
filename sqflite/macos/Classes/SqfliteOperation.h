@@ -4,7 +4,7 @@
 //
 //  Created by Alexandre Roux on 09/01/2018.
 //
-#import "SqflitePlugin.h"
+#import "SqfliteSqlCipherPlugin.h"
 
 #ifndef SqfliteOperation_h
 #define SqfliteOperation_h

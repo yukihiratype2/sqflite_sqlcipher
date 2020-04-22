@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:e2e/e2e.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 // import 'sqflite_impl_test.dart' show devVerbose;
 
 void main() {

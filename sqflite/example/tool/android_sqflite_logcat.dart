@@ -1,5 +1,5 @@
 import 'package:process_run/shell.dart';
-import 'package:sqflite_example/src/common_import.dart';
+import 'package:sqflite_sqlcipher_example/src/common_import.dart';
 
 Future<void> main() async {
   final controller = StreamController<List<int>>();

@@ -1,6 +1,6 @@
 import 'package:path/path.dart';
 import 'package:process_run/shell.dart';
-import 'package:sqflite_example/utils.dart';
+import 'package:sqflite_sqlcipher_example/utils.dart';
 
 import 'run_flutter_driver_test.dart' as driver;
 

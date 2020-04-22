@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_example/src/common_import.dart';
+import 'package:sqflite_sqlcipher_example/src/common_import.dart';
 
 import 'sqflite_impl_test.dart' as sqflite_impl_test;
 import 'sqflite_test.dart' as sqflite_test;

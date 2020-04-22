@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_example/src/dev_utils.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_sqlcipher_example/src/dev_utils.dart';
 
 import 'test_page.dart';
 
@@ -39,71 +39,6 @@ class RawTestPage extends TestPage {
       var results = await db.rawQuery('select sqlite_version()');
       print('sqlite version: ${results.first.values.first}');
       await db.close();
-    });
-
-    test('Options', () async {
-      // Sqflite.devSetDebugModeOn(true);
-
-      var path = await initDeleteDb('raw_query_format.db');
-      var db = await openDatabase(path);
-      try {
-        var batch = db.batch();
-
-        batch.execute('CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT)');
-        batch.rawInsert('INSERT INTO Test (name) VALUES (?)', ['item 1']);
-        batch.rawInsert('INSERT INTO Test (name) VALUES (?)', ['item 2']);
-        await batch.commit();
-
-        // ignore: deprecated_member_use, deprecated_member_use_from_same_package
-        var sqfliteOptions = SqfliteOptions()..queryAsMapList = true;
-        // ignore: deprecated_member_use
-        await Sqflite.devSetOptions(sqfliteOptions);
-        var sql = 'SELECT id, name FROM Test';
-        // ignore: deprecated_member_use
-        var result = await db.devInvokeSqlMethod('query', sql);
-        var expected = [
-          {'id': 1, 'name': 'item 1'},
-          {'id': 2, 'name': 'item 2'}
-        ];
-        print('result as map list $result');
-        expect(result, expected);
-
-        // empty
-        sql = 'SELECT id, name FROM Test WHERE id=1234';
-        // ignore: deprecated_member_use
-        result = await db.devInvokeSqlMethod('query', sql);
-        expected = [];
-        print('result as map list $result');
-        expect(result, expected);
-
-        // ignore: deprecated_member_use, deprecated_member_use_from_same_package
-        sqfliteOptions = SqfliteOptions()..queryAsMapList = false;
-        // ignore: deprecated_member_use
-        await Sqflite.devSetOptions(sqfliteOptions);
-
-        sql = 'SELECT id, name FROM Test';
-        // ignore: deprecated_member_use
-        var resultSet = await db.devInvokeSqlMethod('query', sql);
-        var expectedResultSetMap = {
-          'columns': ['id', 'name'],
-          'rows': [
-            [1, 'item 1'],
-            [2, 'item 2']
-          ]
-        };
-        print('result as r/c $resultSet');
-        expect(resultSet, expectedResultSetMap);
-
-        // empty
-        sql = 'SELECT id, name FROM Test WHERE id=1234';
-        // ignore: deprecated_member_use
-        resultSet = await db.devInvokeSqlMethod('query', sql);
-        expectedResultSetMap = {};
-        print('result as r/c $resultSet');
-        expect(resultSet, expectedResultSetMap);
-      } finally {
-        await db?.close();
-      }
     });
 
     test('Transaction', () async {
@@ -512,19 +447,12 @@ class RawTestPage extends TestPage {
         await db
             .execute('CREATE TABLE Test (name TEXT PRIMARY KEY) WITHOUT ROWID');
         var id = await db.insert('Test', {'name': 'test'});
-        // it seems to always return 1 on Android, 0 on iOS...
-        if (Platform.isIOS || Platform.isMacOS) {
-          expect(id, 0);
-        } else {
-          expect(id, 1);
-        }
+
+        expect(id, 0);
+
         id = await db.insert('Test', {'name': 'other'});
-        // it seems to always return 1
-        if (Platform.isIOS || Platform.isMacOS) {
-          expect(id, 0);
-        } else {
-          expect(id, 1);
-        }
+        expect(id, 0);
+
         // notice the order is based on the primary key
         var list = await db.query('Test');
         expect(list, [
