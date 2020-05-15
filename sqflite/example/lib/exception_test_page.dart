@@ -151,7 +151,9 @@ class ExceptionTestPage extends TestPage {
         // iOS: Error Domain=FMDatabase Code=19 'UNIQUE constraint failed: Test.name' UserInfo={NSLocalizedDescription=UNIQUE constraint failed: Test.name}) s
         // Android: UNIQUE constraint failed: Test.name (code 2067))
         print(e);
+
         verify(e.isUniqueConstraintError());
+        expect(e.getResultCode(), 2067);
         verify(e.isUniqueConstraintError('Test.name'));
       }
 
@@ -174,6 +176,8 @@ class ExceptionTestPage extends TestPage {
         print(e);
         verify(e.isUniqueConstraintError());
         verify(e.isUniqueConstraintError('Test.name'));
+
+        expect(e.getResultCode(), 1555);
       }
 
       await db.close();

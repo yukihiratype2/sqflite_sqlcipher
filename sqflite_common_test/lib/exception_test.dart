@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart';
 import 'package:sqflite_common/sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common/utils/utils.dart' as utils;
@@ -138,6 +139,50 @@ void run(SqfliteTestContext context) {
       await db.close();
     });
 
+    test('open read-only exception', () async {
+      var path = await context.initDeleteDb('read_only_exception.db');
+      // Make sure the path exists
+      try {
+        await Directory(dirname(path)).create(recursive: true);
+      } catch (_) {}
+      // but not the db
+      try {
+        await File(path).delete();
+      } catch (_) {}
+
+      // Opening a non-existent database should fail
+      try {
+        await factory.openDatabase(path,
+            options: OpenDatabaseOptions(readOnly: true));
+        fail('should fail');
+      } on DatabaseException catch (_) {
+        /// Ffi: SqfliteFfiException(error, Bad state: file read_only_exception.db not found
+      }
+
+      // Open in read-write mode to create the database
+      var db = await factory.openDatabase(path);
+      // Change the user version to test read-write access
+      await db.setVersion(1);
+      await db.close();
+
+      // Open in read-only
+      db = await factory.openDatabase(path,
+          options: OpenDatabaseOptions(readOnly: true));
+      // Change the user version to test read-only mode
+      try {
+        // await db.setVersion(2);
+        await db.execute('PRAGMA user_version = 2');
+        fail('should fail');
+      } on DatabaseException catch (e) {
+        // ffo: SqfliteFfiException(sqlite_error8, , SqliteException(8): attempt to write a readonly database} DatabaseException(SqliteException(8): attempt to write a readonly database) sql 'PRAGMA user_version = 2
+        print(e);
+        expect(e.isReadOnlyError(), isTrue);
+        expect(e.getResultCode(), 8);
+      }
+      // Check that it has not changed
+      expect(await db.getVersion(), 1);
+    });
+
     test('Sqlite constraint Exception', () async {
       // await utils.devSetDebugModeOn(true);
       var path = await context.initDeleteDb('constraint_exception.db');
@@ -151,19 +196,44 @@ void run(SqfliteTestContext context) {
 
       try {
         await db.insert('Test', <String, dynamic>{'name': 'test1'});
+        fail('should fail');
       } on DatabaseException catch (e) {
         // iOS: Error Domain=FMDatabase Code=19 'UNIQUE constraint failed: Test.name' UserInfo={NSLocalizedDescription=UNIQUE constraint failed: Test.name}) s
         // Android: UNIQUE constraint failed: Test.name (code 2067))
         print(e);
         verify(e.isUniqueConstraintError());
         verify(e.isUniqueConstraintError('Test.name'));
+        expect(e.getResultCode(), 2067);
       }
+      await db.close();
+    });
 
+    test('Sqlite constraint not null', () async {
+      // await utils.devSetDebugModeOn(true);
+      var path = await context.initDeleteDb('constraint_not_null_exception.db');
+      var db = await factory.openDatabase(path,
+          options: OpenDatabaseOptions(
+              version: 1,
+              onCreate: (db, version) {
+                db.execute(
+                    'CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL)');
+              }));
+      await db.insert('Test', <String, dynamic>{'id': 1, 'name': 'test1'});
+      try {
+        await db.insert('Test', <String, dynamic>{'id': 1});
+        fail('should fail');
+      } on DatabaseException catch (e) {
+        print(e);
+        // iOS DatabaseException(Error Domain=FMDatabase Code=1299 "NOT NULL constraint failed: Test.name"
+        expect(e.getResultCode(), 1299);
+        expect(e.isNotNullConstraintError(), isTrue);
+        expect(e.isNotNullConstraintError('Test.name'), isTrue);
+      }
       await db.close();
     });
 
     test('Sqlite constraint primary key', () async {
-      // await utils.devSetDebugModeOn(true);
+      // await context.devSetDebugModeOn(true);
       var path =
           await context.initDeleteDb('constraint_primary_key_exception.db');
       var db = await factory.openDatabase(path,
@@ -176,14 +246,43 @@ void run(SqfliteTestContext context) {
 
       try {
         await db.insert('Test', <String, dynamic>{'name': 'test1'});
+        fail('should fail');
+      } on DatabaseException catch (e) {
+        // iOS: DatabaseException(Error Domain=FMDatabase Code=1555 "UNIQUE constraint failed: Test.name"
+        // Android: UNIQUE constraint failed: Test.name (code 1555))
+        print(e);
+        expect(e.isUniqueConstraintError(), isTrue);
+        expect(e.isUniqueConstraintError('Test.name'), isTrue);
+        expect(e.getResultCode(), 1555);
+      }
+
+      // try in batch
+      var batch = db.batch();
+      batch.insert('Test', <String, dynamic>{'name': 'test1'});
+      try {
+        await batch.commit();
+        fail('should fail');
       } on DatabaseException catch (e) {
         // iOS: Error Domain=FMDatabase Code=19 'UNIQUE constraint failed: Test.name' UserInfo={NSLocalizedDescription=UNIQUE constraint failed: Test.name}) s
         // Android: UNIQUE constraint failed: Test.name (code 1555))
         print(e);
-        verify(e.isUniqueConstraintError());
-        verify(e.isUniqueConstraintError('Test.name'));
+        expect(e.isUniqueConstraintError(), isTrue);
+        expect(e.isUniqueConstraintError('Test.name'), isTrue);
+        expect(e.getResultCode(), 1555);
       }
 
+      // update
+      await db.insert('Test', <String, dynamic>{'name': 'test2'});
+      try {
+        await db.update('Test', <String, dynamic>{'name': 'test1'},
+            where: 'name = "test2"');
+        fail('should fail');
+      } on DatabaseException catch (e) {
+        // iOS DatabaseException(Error Domain=FMDatabase Code=1555 "UNIQUE constraint failed: Test.name"
+        expect(e.getResultCode(), 1555);
+        expect(e.isUniqueConstraintError(), isTrue);
+        expect(e.isUniqueConstraintError('Test.name'), isTrue);
+      }
       await db.close();
     });
 
@@ -200,7 +299,10 @@ void run(SqfliteTestContext context) {
         fail('should fail'); // should fail before
       } on DatabaseException catch (e) {
         print(e);
+        // DatabaseException(Error Domain=FMDatabase Code=1 "no such table: Test"
+        // ffi: SqfliteFfiException(sqlite_error, SqliteException(1): no such table: Test, SQL logic error (code 1)}
         verify(e.isNoSuchTableError('Test'));
+        expect(e.getResultCode(), 1);
       }
 
       // Catch without using on DatabaseException
@@ -215,6 +317,7 @@ void run(SqfliteTestContext context) {
         //verify(e.toString().contains('malformed query'));
         // malform only on FFI
         verify(e.toString().contains('malformed'));
+        expect(e.getResultCode(), 1);
       }
 
       try {
@@ -228,6 +331,7 @@ void run(SqfliteTestContext context) {
         // verify(e.toString().contains('malformed query with args ?'));
         // FFI only SqliteException: near 'malformed': syntax error, SQL logic error
         verify(e.toString().contains('malformed'));
+        expect(e.getResultCode(), 1);
       }
 
       try {
@@ -239,7 +343,9 @@ void run(SqfliteTestContext context) {
         verify(e.isSyntaxError());
         // devPrint(e);
         // iOS Error Domain=FMDatabase Code=1 'near 'DUMMY': syntax error' UserInfo={NSLocalizedDescription=near 'DUMMY': syntax error})
+        // ffi: SqfliteFfiException(sqlite_error, SqliteException(1): near "malformed": syntax error, SQL logic error (code 1
         verify(e.toString().contains('DUMMY'));
+        expect(e.getResultCode(), 1);
       }
 
       try {
@@ -250,6 +356,7 @@ void run(SqfliteTestContext context) {
       } on DatabaseException catch (e) {
         verify(e.isSyntaxError());
         verify(e.toString().contains('DUMMY'));
+        expect(e.getResultCode(), 1);
       }
 
       try {
@@ -260,6 +367,7 @@ void run(SqfliteTestContext context) {
       } on DatabaseException catch (e) {
         verify(e.isSyntaxError());
         verify(e.toString().contains('DUMMY'));
+        expect(e.getResultCode(), 1);
       }
 
       await db.close();

@@ -39,7 +39,8 @@ class SqfliteIsolate {
         throw SqfliteFfiException(
             code: error['code'] as String,
             message: error['message'] as String,
-            details: (error['details'] as Map)?.cast<String, dynamic>());
+            details: (error['details'] as Map)?.cast<String, dynamic>(),
+            resultCode: error['resultCode'] as int);
       }
       return response['result'];
     }
@@ -93,6 +94,7 @@ Future _isolate(SendPort sendPort) async {
               error['code'] = e.code;
               error['details'] = e.details;
               error['message'] = e.message;
+              error['resultCode'] = e.getResultCode();
             } else {
               // should not happen
               error['message'] = e.toString();

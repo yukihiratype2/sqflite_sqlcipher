@@ -6,8 +6,11 @@ import 'package:sqflite_common_ffi/src/sqflite_import.dart';
 class SqfliteFfiException extends SqfliteDatabaseException {
   /// Ffi exception.
   SqfliteFfiException(
-      {@required this.code, @required String message, this.details})
-      : super(message, details);
+      {@required this.code,
+      @required String message,
+      this.details,
+      int resultCode})
+      : super(message, details, resultCode: resultCode);
 
   /// The database.
   SqfliteFfiDatabase database;
@@ -24,12 +27,14 @@ class SqfliteFfiException extends SqfliteDatabaseException {
   /// Error details.
   Map<String, dynamic> details;
 
+  int get _resultCode => getResultCode();
+
   @override
   String toString() {
     var map = <String, dynamic>{};
     if (details != null) {
       map['details'] = details;
     }
-    return 'SqfliteFfiException($code, $message} ${super.toString()} $map';
+    return 'SqfliteFfiException($code${_resultCode == null ? '' : '$_resultCode, '}, $message} ${super.toString()} $map';
   }
 }

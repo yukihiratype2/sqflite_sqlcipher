@@ -371,7 +371,7 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
             } catch (_) {}
           }
         }
-        ffiDb = ffi.Database.open(path);
+        ffiDb = ffi.Database.open(path, readOnly: readOnly);
       }
     } on ffi.SqliteException catch (e) {
       throw wrapSqlException(e, code: 'open_failed');
@@ -515,7 +515,8 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
         // Hardcoded
         code: sqliteErrorCode,
         message: code == null ? '$e' : '$code: $e',
-        details: details);
+        details: details,
+        resultCode: e.extendedResultCode);
   }
 
   /// Handle execute.
@@ -524,6 +525,8 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
     var sql = getSql();
     var sqlArguments = getSqlArguments();
 
+    /*
+    pre moor_ffi when read only was not supported
     var writeAttempt = false;
     // Handle some cases
     // PRAGMA user_version =
@@ -535,7 +538,7 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
       throw SqfliteFfiException(
           code: sqliteErrorCode, message: 'Database readonly');
     }
-
+     */
     return database.handleExecute(sql: sql, sqlArguments: sqlArguments);
   }
 

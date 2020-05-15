@@ -65,15 +65,39 @@ abstract class DatabaseException implements Exception {
     }
     return false;
   }
+
+  /// True if the exception is a not null constraint error
+  bool isNotNullConstraintError([String field]) {
+    if (_message != null) {
+      var expected = 'NOT NULL constraint failed: ';
+      if (field != null) {
+        expected += field;
+      }
+      return _message.toLowerCase().contains(expected.toLowerCase());
+    }
+    return false;
+  }
+
+  /// Extended result code on Android/ffi, normal result code on iOS.
+  ///
+  /// This might involve parsing the sqlite native message to extract the code
+  /// See https://www.sqlite.org/rescode.html for the list of result code
+  int getResultCode();
 }
 
 /// Exception implementation
 class SqfliteDatabaseException extends DatabaseException {
   /// ctor with a message and some data
-  SqfliteDatabaseException(String message, this.result) : super(message);
+  SqfliteDatabaseException(String message, this.result, {int resultCode})
+      : super(message) {
+    _resultCode = resultCode;
+  }
 
   /// Our exception message
   String get message => _message;
+
+  /// Extended result code.
+  int _resultCode;
 
   /// Typically the result of a native call
   dynamic result;
@@ -93,35 +117,53 @@ class SqfliteDatabaseException extends DatabaseException {
     return super.toString();
   }
 
-  /// Parse the sqlite native message to extract the code
-  /// See https://www.sqlite.org/rescode.html for the list of result code
-  int getResultCode() {
-    final message = _message.toLowerCase();
-    int findCode(String patternPrefix) {
-      final index = message.indexOf(patternPrefix);
-      if (index != -1) {
-        final code = message.substring(index + patternPrefix.length);
-        final endIndex = code.indexOf(')');
-        if (endIndex != -1) {
-          try {
-            final resultCode = int.parse(code.substring(0, endIndex));
-            if (resultCode != null) {
-              return resultCode;
-            }
-          } catch (_) {}
-        }
-      }
-      return null;
-    }
+  /// Get the (extended if available) result code.
+  ///
+  /// This might involve parsing the sqlite native message to extract the code
+  /// See https://www.sqlite.org/rescode.html for the list of result code.
+  ///
+  /// iOS returns normal code while Android/ffi returns extended code for now
+  /// The application should handle both.
+  @override
+  int getResultCode() => _resultCode ??= () {
+        final message = _message.toLowerCase();
+        int findCode(String patternPrefix) {
+          final index = message.indexOf(patternPrefix);
+          if (index != -1) {
+            try {
+              // Split at first space
+              var code = message
+                  .substring(index + patternPrefix.length)
+                  .trim()
+                  .split(' ')[0];
+              // Find ending parenthesis if any
+              final endIndex = code.indexOf(')');
+              if (endIndex != -1) {
+                code = code.substring(0, endIndex);
+              }
 
-    var code = findCode('(sqlite code ');
-    if (code != null) {
-      return code;
-    }
-    code = findCode('(code ');
-    if (code != null) {
-      return code;
-    }
-    return null;
-  }
+              final resultCode = int.parse(code);
+              if (resultCode != null) {
+                return resultCode;
+              }
+            } catch (_) {}
+          }
+          return null;
+        }
+
+        var code = findCode('(sqlite code ');
+        if (code != null) {
+          return code;
+        }
+        code = findCode('(code ');
+        if (code != null) {
+          return code;
+        }
+        // ios
+        code = findCode('code=');
+        if (code != null) {
+          return code;
+        }
+        return null;
+      }();
 }
