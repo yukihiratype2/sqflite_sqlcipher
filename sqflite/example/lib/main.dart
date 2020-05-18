@@ -205,8 +205,55 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title:
-              Center(child: Text('Sqflite demo', textAlign: TextAlign.center)),
+          title: Center(
+            child: Text('Sqflite demo', textAlign: TextAlign.center),
+          ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.info),
+              onPressed: () async {
+                final db = await openDatabase(inMemoryDatabasePath);
+                final versionRows = await db.rawQuery('PRAGMA cipher_version');
+                final version =
+                    versionRows.map((e) => e.values.first).join('\n');
+
+                final compileOptionsRows =
+                    await db.rawQuery('PRAGMA compile_options');
+                final compileOptions =
+                    compileOptionsRows.map((e) => e.values.first).join('\n');
+
+                await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Info'),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(
+                          'SQLcipher version:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          version,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          'Compile options:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(compileOptions),
+                      ],
+                    ),
+                  ),
+                );
+
+                await db.close();
+              },
+            ),
+          ],
         ),
         body:
             ListView.builder(itemBuilder: _itemBuilder, itemCount: _itemCount));

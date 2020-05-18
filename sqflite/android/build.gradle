@@ -43,6 +43,6 @@ android {
 
 dependencies {
     implementation fileTree(include: '*.jar', dir: 'libs')
-    implementation 'net.zetetic:android-database-sqlcipher:4.3.0'
+    implementation 'net.zetetic:android-database-sqlcipher:4.4.0'
     testImplementation 'junit:junit:4.12'
 }
