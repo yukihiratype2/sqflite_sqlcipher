@@ -14,6 +14,11 @@ dependencies:
     sdk: flutter
   sqflite_sqlcipher:
     path: ../
+  sqflite:
+    git:
+      url: https://www.github.com/davidmartos96/sqflite_sqlcipher.git
+      path: sqflite
+      ref: fmdb_override
   synchronized: ^2.2.0
 
 
