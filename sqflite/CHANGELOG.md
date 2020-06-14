@@ -1,3 +1,7 @@
+## 1.1.1
+
+* Remove unnecessary logs
+
 ## 1.1.0+1
 
 * Update SQLCipher version to [4.4.0](https://www.zetetic.net/blog/2020/05/12/sqlcipher-440-release/)

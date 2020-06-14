@@ -654,7 +654,6 @@ static NSInteger _databaseOpenCount = 0;
         } else {
             [database setKey:password];
         }
-        NSLog(@"Encryption is ready.");
     }];
     
     NSNumber* databaseId;
