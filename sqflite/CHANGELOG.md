@@ -1,3 +1,8 @@
+## 1.1.2
+
+* Update SQLCipher version to [4.4.1](https://www.zetetic.net/blog/2020/11/06/sqlcipher-441-release/)
+* Fix Handler constructor deprecation
+
 ## 1.1.1
 
 * Remove unnecessary logs
