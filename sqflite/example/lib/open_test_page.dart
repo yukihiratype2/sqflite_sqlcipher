@@ -296,7 +296,7 @@ class OpenTestPage extends TestPage {
       var database = await openDatabase(path, version: 2,
           onCreate: (Database db, int version) async {
         await db.execute('CREATE TABLE Test(id INTEGER PRIMARY KEY)');
-      } as FutureOr<void> Function(Database, int)?, onDowngrade: (Database db, int oldVersion, int newVersion) async {
+      }, onDowngrade: (Database db, int oldVersion, int newVersion) async {
         verify(false, 'should not be called');
       });
       expect(await database.getVersion(), 2);
@@ -654,7 +654,7 @@ class OpenTestPage extends TestPage {
         // ignore: unawaited_futures
         helper.getDb();
       }
-      var db = await (helper.getDb() as FutureOr<Database>);
+      var db = await (helper.getDb());
       await db.close();
     });
 
@@ -831,7 +831,7 @@ class OpenTestPage extends TestPage {
         //await db.execute('ROLLBACK');
 
         db = await (factory.openDatabase(path,
-            options: OpenDatabaseOptions(version: 1)) as FutureOr<SqfliteDatabaseMixin>);
+            options: OpenDatabaseOptions(version: 1)));
         expect(db, db2);
       } finally {
         await db.close();
@@ -853,7 +853,7 @@ class OpenTestPage extends TestPage {
 
       // try read-only
       {
-        late Database db;
+        Database? db;
         try {
           db = await factory.openDatabase(path,
               options: OpenDatabaseOptions(readOnly: true));
@@ -861,11 +861,11 @@ class OpenTestPage extends TestPage {
           print('open error');
         }
         try {
-          await db.getVersion();
+          await db?.getVersion();
         } catch (e) {
           print('getVersion error');
         }
-        await db.close();
+        await db?.close();
 
         // check content
         expect(await File(path).readAsString(), 'dummy');
@@ -927,13 +927,13 @@ class Helper {
   final _lock = Lock();
 
   /// Open the database if not done.
-  Future<Database?> getDb() async {
+  Future<Database> getDb() async {
     if (_db == null) {
       await _lock.synchronized(() async {
         // Check again once entering the synchronized block
         _db ??= await openDatabase(path);
       });
     }
-    return _db;
+    return _db!;
   }
 }

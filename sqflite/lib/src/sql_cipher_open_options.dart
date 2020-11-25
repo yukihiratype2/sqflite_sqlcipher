@@ -17,10 +17,8 @@ class SqfliteSqlCipherOpenDatabaseOptions
     this.password,
     this.readOnly = false,
     this.singleInstance = true,
-  }) {
-    readOnly ??= false;
-    singleInstance ??= true;
-  }
+  });
+  
   @override
   int? version;
   @override

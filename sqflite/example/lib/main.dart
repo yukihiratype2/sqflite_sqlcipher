@@ -32,7 +32,7 @@ class MyApp extends StatefulWidget {
 }
 
 /// SqlCipher test page
-const String testSqlCipherRoute = "/test/sqlcipher";
+const String testSqlCipherRoute = '/test/sqlcipher';
 
 /// Simple test page.
 const String testRawRoute = '/test/simple';
@@ -106,11 +106,11 @@ class MyHomePage extends StatefulWidget {
   /// App home menu page.
   MyHomePage({Key? key, this.title}) : super(key: key) {
     _items.add(MainItem(
-        "Sqlcipher tests", "Simple tests with an encrypted database",
+        'Sqlcipher tests', 'Simple tests with an encrypted database',
         route: testSqlCipherRoute));
     _items.add(
-        MainItem("Raw tests", "Raw SQLite operations", route: testRawRoute));
-    _items.add(MainItem("Open tests", "Open onCreate/onUpgrade/onDowngrade",
+        MainItem('Raw tests', 'Raw SQLite operations', route: testRawRoute));
+    _items.add(MainItem('Open tests', 'Open onCreate/onUpgrade/onDowngrade',
         route: testOpenRoute));
     _items
         .add(MainItem('Type tests', 'Test value types', route: testTypeRoute));

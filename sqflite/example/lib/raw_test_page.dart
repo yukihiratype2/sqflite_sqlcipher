@@ -125,7 +125,7 @@ class RawTestPage extends TestPage {
             await db.rawQuery('SELECT COUNT(*) FROM Test'));
         expect(count, 1);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
 
@@ -184,7 +184,7 @@ class RawTestPage extends TestPage {
             await db.rawQuery('SELECT COUNT(*) FROM Test'));
         expect(count, 1);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
 
@@ -205,7 +205,7 @@ class RawTestPage extends TestPage {
             await db.rawQuery('SELECT COUNT(*) FROM Test'));
         expect(afterCount, 2);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
 
@@ -241,8 +241,8 @@ class RawTestPage extends TestPage {
             await db.rawQuery('SELECT COUNT(*) FROM Test'));
         expect(afterCount, 1);
       } finally {
-        await db?.close();
-        await db2?.close();
+        await db.close();
+        await db2.close();
       }
     });
 
@@ -262,7 +262,7 @@ class RawTestPage extends TestPage {
         // restore
         await Sqflite.setDebugModeOn(debugModeOn);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
 
@@ -318,7 +318,7 @@ class RawTestPage extends TestPage {
         print('expected $expectedList');
         expect(list, expectedList);
       } finally {
-        await database?.close();
+        await database.close();
       }
     });
 
@@ -402,8 +402,8 @@ class RawTestPage extends TestPage {
             await db2.rawQuery('SELECT COUNT(*) FROM Test'));
         expect(count, 0);
       } finally {
-        await db?.close();
-        await db2?.close();
+        await db.close();
+        await db2.close();
       }
     });
 
@@ -430,7 +430,7 @@ class RawTestPage extends TestPage {
           {'name': 'other', 'rowid': 2}
         ]);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
 
@@ -460,7 +460,7 @@ class RawTestPage extends TestPage {
           {'name': 'test'}
         ]);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
 

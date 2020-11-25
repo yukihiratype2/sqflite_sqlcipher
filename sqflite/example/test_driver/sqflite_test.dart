@@ -15,7 +15,7 @@ void main() {
       try {
         expect(await databaseExists(path), isTrue);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
     test('close in transaction', () async {
@@ -40,14 +40,10 @@ void main() {
     ///
     /// An empty file is a valid empty sqlite file
     Future<bool> isDatabase(String path) async {
-      late Database db;
+      Database? db;
       var isDatabase = false;
       try {
         db = await openReadOnlyDatabase(path);
-        var version = await db.getVersion();
-        if (version != null) {
-          isDatabase = true;
-        }
       } catch (_) {} finally {
         await db?.close();
       }
@@ -59,7 +55,7 @@ void main() {
       await deleteDatabase(path);
       try {
         var db = await openReadOnlyDatabase(path);
-        fail('should fail ${db?.path}');
+        fail('should fail ${db.path}');
       } on DatabaseException catch (_) {}
 
       expect(await isDatabase(path), isFalse);
@@ -221,7 +217,7 @@ void main() {
         db = await openDatabase(path);
         expect(await db.getVersion(), 0);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
   });

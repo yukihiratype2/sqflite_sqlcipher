@@ -57,7 +57,7 @@ void main() {
             expect(db3.id, id + 1);
           } finally {
             sw = Stopwatch()..start();
-            await db3?.close();
+            await db3.close();
             print('Sqflite closing database: ${sw.elapsed}');
 
             // close again
