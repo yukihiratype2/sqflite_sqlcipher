@@ -22,19 +22,19 @@ class SqfliteSqlCipherOpenDatabaseOptions
     singleInstance ??= true;
   }
   @override
-  int version;
+  int? version;
   @override
-  OnDatabaseConfigureFn onConfigure;
+  OnDatabaseConfigureFn? onConfigure;
   @override
-  OnDatabaseCreateFn onCreate;
+  OnDatabaseCreateFn? onCreate;
   @override
-  OnDatabaseVersionChangeFn onUpgrade;
+  OnDatabaseVersionChangeFn? onUpgrade;
   @override
-  OnDatabaseVersionChangeFn onDowngrade;
+  OnDatabaseVersionChangeFn? onDowngrade;
   @override
-  OnDatabaseOpenFn onOpen;
+  OnDatabaseOpenFn? onOpen;
   @override
-  String password;
+  String? password;
   @override
   bool readOnly;
   @override
