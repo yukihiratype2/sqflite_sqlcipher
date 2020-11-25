@@ -36,19 +36,19 @@ class OpenCallbacks {
     onOpen = (Database db) {
       //print('onOpen');
       verify(onConfigureCalled, 'onConfigure must be called before onOpen');
-      verify(!onOpenCalled, 'onOpen already called');
+      verify(!onOpenCalled!, 'onOpen already called');
       onOpenCalled = true;
     };
 
     onUpgrade = (Database db, int oldVersion, int newVersion) {
       verify(onConfigureCalled, 'onConfigure not called in onUpgrade');
-      verify(!onUpgradeCalled, 'onUpgradeCalled already called');
+      verify(!onUpgradeCalled!, 'onUpgradeCalled already called');
       onUpgradeCalled = true;
     };
 
     onDowngrade = (Database db, int oldVersion, int newVersion) {
       verify(onConfigureCalled, 'onConfigure not called');
-      verify(!onDowngradeCalled, 'onDowngrade already called');
+      verify(!onDowngradeCalled!, 'onDowngrade already called');
       onDowngradeCalled = true;
     };
 
@@ -56,34 +56,34 @@ class OpenCallbacks {
   }
 
   /// true when onConfigure is called.
-  bool onConfigureCalled;
+  bool? onConfigureCalled;
 
   /// true when onOpen is called.
-  bool onOpenCalled;
+  bool? onOpenCalled;
 
   /// true when onCreate is called.
-  bool onCreateCalled;
+  bool? onCreateCalled;
 
   /// true when onDowngrade is called.
-  bool onDowngradeCalled;
+  bool? onDowngradeCalled;
 
   /// true when onUpgrade is called.
-  bool onUpgradeCalled;
+  bool? onUpgradeCalled;
 
   /// onCreate callback.
-  OnDatabaseCreateFn onCreate;
+  OnDatabaseCreateFn? onCreate;
 
   /// onConfigure callback.
-  OnDatabaseConfigureFn onConfigure;
+  OnDatabaseConfigureFn? onConfigure;
 
   /// onDowngrade callback.
-  OnDatabaseVersionChangeFn onDowngrade;
+  OnDatabaseVersionChangeFn? onDowngrade;
 
   /// onUpgrade callback.
-  OnDatabaseVersionChangeFn onUpgrade;
+  OnDatabaseVersionChangeFn? onUpgrade;
 
   /// onOpen callback.
-  OnDatabaseOpenFn onOpen;
+  OnDatabaseOpenFn? onOpen;
 
   /// reset callbacks called information.
   void reset() {
@@ -95,7 +95,7 @@ class OpenCallbacks {
   }
 
   /// open the database.
-  Future<Database> open(String path, {int version}) async {
+  Future<Database> open(String path, {int? version}) async {
     reset();
     return await databaseFactory.openDatabase(path,
         options: OpenDatabaseOptions(
@@ -111,15 +111,11 @@ class OpenCallbacks {
 /// Check if a file is a valid database file
 ///
 /// An empty file is a valid empty sqlite file
-Future<bool> isDatabase(String path, {String password}) async {
-  Database db;
+Future<bool> isDatabase(String path, {String? password}) async {
+  Database? db;
   var isDatabase = false;
   try {
     db = await openReadOnlyDatabase(path, password: password);
-    var version = await db.getVersion();
-    if (version != null) {
-      isDatabase = true;
-    }
   } catch (_) {} finally {
     await db?.close();
   }
@@ -186,7 +182,7 @@ class OpenTestPage extends TestPage {
       // should fail
       var path = await initDeleteDb('open_no_version_on_create.db');
       verify(!(await File(path).exists()));
-      Database db;
+      Database? db;
       try {
         db = await openDatabase(path, onCreate: (Database db, int version) {
           // never called
@@ -243,7 +239,7 @@ class OpenTestPage extends TestPage {
 
         expect(await isDatabase(path), isTrue);
       } finally {
-        await db?.close();
+        await db.close();
       }
       expect(await isDatabase(path), isTrue);
     });
@@ -300,7 +296,7 @@ class OpenTestPage extends TestPage {
       var database = await openDatabase(path, version: 2,
           onCreate: (Database db, int version) async {
         await db.execute('CREATE TABLE Test(id INTEGER PRIMARY KEY)');
-      }, onDowngrade: (Database db, int oldVersion, int newVersion) async {
+      } as FutureOr<void> Function(Database, int)?, onDowngrade: (Database db, int oldVersion, int newVersion) async {
         verify(false, 'should not be called');
       });
       expect(await database.getVersion(), 2);
@@ -447,25 +443,25 @@ class OpenTestPage extends TestPage {
       verify(openCallbacks.onConfigureCalled, 'onConfiguredCalled $step');
       verify(openCallbacks.onCreateCalled, 'onCreateCalled $step');
       verify(openCallbacks.onOpenCalled, 'onOpenCalled $step');
-      verify(!openCallbacks.onUpgradeCalled, 'onUpgradeCalled $step');
-      verify(!openCallbacks.onDowngradeCalled, 'onDowngradCalled $step');
+      verify(!openCallbacks.onUpgradeCalled!, 'onUpgradeCalled $step');
+      verify(!openCallbacks.onDowngradeCalled!, 'onDowngradCalled $step');
       await db.close();
 
       ++step;
       db = await openCallbacks.open(path, version: 3);
       verify(openCallbacks.onConfigureCalled, 'onConfiguredCalled $step');
-      verify(!openCallbacks.onCreateCalled, 'onCreateCalled $step');
+      verify(!openCallbacks.onCreateCalled!, 'onCreateCalled $step');
       verify(openCallbacks.onOpenCalled, 'onOpenCalled $step');
       verify(openCallbacks.onUpgradeCalled, 'onUpgradeCalled $step');
-      verify(!openCallbacks.onDowngradeCalled, 'onDowngradCalled $step');
+      verify(!openCallbacks.onDowngradeCalled!, 'onDowngradCalled $step');
       await db.close();
 
       ++step;
       db = await openCallbacks.open(path, version: 2);
       verify(openCallbacks.onConfigureCalled, 'onConfiguredCalled $step');
-      verify(!openCallbacks.onCreateCalled, 'onCreateCalled $step');
+      verify(!openCallbacks.onCreateCalled!, 'onCreateCalled $step');
       verify(openCallbacks.onOpenCalled, 'onOpenCalled $step');
-      verify(!openCallbacks.onUpgradeCalled, 'onUpgradeCalled $step');
+      verify(!openCallbacks.onUpgradeCalled!, 'onUpgradeCalled $step');
       verify(openCallbacks.onDowngradeCalled, 'onDowngradCalled $step');
       await db.close();
 
@@ -478,7 +474,7 @@ class OpenTestPage extends TestPage {
           openCallbacks.onConfigureCalled = false;
         }
         configureCount++;
-        callback(db);
+        callback!(db);
       };
       ++step;
       db = await openCallbacks.open(path, version: 1);
@@ -621,7 +617,7 @@ class OpenTestPage extends TestPage {
         var path = join(databasesPath, 'demo_asset_example.db');
 
         // try opening (will work if it exists)
-        Database db;
+        Database? db;
         try {
           db = await openDatabase(path, readOnly: true);
         } catch (e) {
@@ -658,14 +654,14 @@ class OpenTestPage extends TestPage {
         // ignore: unawaited_futures
         helper.getDb();
       }
-      var db = await helper.getDb();
+      var db = await (helper.getDb() as FutureOr<Database>);
       await db.close();
     });
 
     test('single/multi instance (using factory)', () async {
       // await Sqflite.devSetDebugModeOn(true);
       var path = await initDeleteDb('instances_test.db');
-      Database db1, db2, db3;
+      Database? db1, db2, db3;
       try {
         db1 = await databaseFactory.openDatabase(path,
             options: OpenDatabaseOptions(singleInstance: false));
@@ -676,9 +672,9 @@ class OpenTestPage extends TestPage {
         expect(db1, isNot(db2));
         expect(db2, db3);
       } finally {
-        await db1.close();
-        await db2.close();
-        await db3.close(); // safe to close the same instance
+        await db1!.close();
+        await db2!.close();
+        await db3!.close(); // safe to close the same instance
       }
     });
 
@@ -834,8 +830,8 @@ class OpenTestPage extends TestPage {
         //await db.getVersion();
         //await db.execute('ROLLBACK');
 
-        db = await factory.openDatabase(path,
-            options: OpenDatabaseOptions(version: 1));
+        db = await (factory.openDatabase(path,
+            options: OpenDatabaseOptions(version: 1)) as FutureOr<SqfliteDatabaseMixin>);
         expect(db, db2);
       } finally {
         await db.close();
@@ -857,7 +853,7 @@ class OpenTestPage extends TestPage {
 
       // try read-only
       {
-        Database db;
+        late Database db;
         try {
           db = await factory.openDatabase(path,
               options: OpenDatabaseOptions(readOnly: true));
@@ -869,7 +865,7 @@ class OpenTestPage extends TestPage {
         } catch (e) {
           print('getVersion error');
         }
-        await db?.close();
+        await db.close();
 
         // check content
         expect(await File(path).readAsString(), 'dummy');
@@ -893,7 +889,7 @@ class OpenTestPage extends TestPage {
         // On Android the database is re-created
         await db.getVersion();
       }
-      await db?.close();
+      await db.close();
 
       if (Platform.isIOS || Platform.isMacOS) {
         // On iOS it fails
@@ -909,7 +905,7 @@ class OpenTestPage extends TestPage {
         // On Android the database is re-created
         await db.getVersion();
       }
-      await db?.close();
+      await db.close();
 
       if (Platform.isAndroid) {
         // Content has changed, it is a big file now!
@@ -927,11 +923,11 @@ class Helper {
 
   /// Datebase path.
   final String path;
-  Database _db;
+  Database? _db;
   final _lock = Lock();
 
   /// Open the database if not done.
-  Future<Database> getDb() async {
+  Future<Database?> getDb() async {
     if (_db == null) {
       await _lock.synchronized(() async {
         // Check again once entering the synchronized block
