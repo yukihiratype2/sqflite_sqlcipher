@@ -84,6 +84,11 @@ void main() {
           1
         ],
         [
+          'query',
+          {'sql': 'PRAGMA user_version', 'arguments': null, 'id': 1},
+          {}
+        ],
+        [
           'execute',
           {
             'sql': 'BEGIN EXCLUSIVE',
@@ -96,7 +101,7 @@ void main() {
         [
           'query',
           {'sql': 'PRAGMA user_version', 'arguments': null, 'id': 1},
-          null
+          {}
         ],
         [
           'execute',
