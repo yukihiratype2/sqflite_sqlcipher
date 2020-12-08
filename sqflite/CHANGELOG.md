@@ -1,3 +1,7 @@
+## 1.1.3
+
+* Update SQLCipher version to [4.4.2](https://www.zetetic.net/blog/2020/11/25/sqlcipher-442-release/)
+
 ## 1.1.2
 
 * Update SQLCipher version to [4.4.1](https://www.zetetic.net/blog/2020/11/06/sqlcipher-441-release/)
