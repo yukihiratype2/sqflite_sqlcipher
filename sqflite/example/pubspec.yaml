@@ -1,7 +1,7 @@
 name: sqflite_sqlcipher_example
 description: Demonstrates how to use the sqflite plugin.
 publish_to: none
-version: '0.2.0'
+version: "0.2.0"
 
 environment:
   sdk: ">=2.7.0-dev <3.0.0"
@@ -16,11 +16,10 @@ dependencies:
     path: ../
   sqflite:
     git:
-      url: https://www.github.com/daohoangson/sqflite_sqlcipher.git
+      url: https://www.github.com/davidmartos96/sqflite_sqlcipher.git
       path: sqflite
       ref: fmdb_override
   synchronized: ^2.2.0
-
 
 dev_dependencies:
   flutter_test:
@@ -29,16 +28,15 @@ dev_dependencies:
     sdk: flutter
   e2e: ^0.2.1
   test:
-  matcher: '>=0.12.3 < 2.0.0'
-  pedantic: '>=1.4.0 <3.0.0'
-  process_run: '>=0.10.0'
+  matcher: ">=0.12.3 < 2.0.0"
+  pedantic: ">=1.4.0 <3.0.0"
+  process_run: ">=0.10.0"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the Icons class.
