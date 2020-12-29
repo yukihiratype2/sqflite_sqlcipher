@@ -1,3 +1,7 @@
+## 1.1.4
+
+* Update names in ios native implementation to avoid conflicts with the `sqflite` package
+
 ## 1.1.3
 
 * Update SQLCipher version to [4.4.2](https://www.zetetic.net/blog/2020/11/25/sqlcipher-442-release/)
