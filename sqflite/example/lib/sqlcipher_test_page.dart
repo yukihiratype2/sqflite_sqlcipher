@@ -5,6 +5,8 @@ import 'package:path/path.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:sqflite_sqlcipher_example/open_test_page.dart';
 
+import 'package:sqflite/sqflite.dart' as sqflite;
+
 import 'test_page.dart';
 
 /// Cipher test page.
@@ -105,6 +107,35 @@ class SqlCipherTestPage extends TestPage {
       expect(list.length, greaterThan(0));
 
       await db.close();
+    });
+
+    test('Open an unencrypted database with the package sqflite', () async {
+      String path = await initDeleteDb("unencrypted.db");
+
+      Database db = await sqflite.openDatabase(
+        path,
+        version: 1,
+        onCreate: (db, version) async {
+          Batch batch = db.batch();
+
+          batch
+              .execute("CREATE TABLE Test (id INTEGER PRIMARY KEY, text NAME)");
+          await batch.commit();
+        },
+      );
+
+      try {
+        expect(
+            await db.rawInsert("INSERT INTO Test (text) VALUES (?)", ['test']),
+            1);
+        var result = await db.query("Test");
+        List expected = [
+          {'id': 1, 'text': 'test'}
+        ];
+        expect(result, expected);
+      } finally {
+        await db?.close();
+      }
     });
   }
 }

@@ -19,6 +19,10 @@ Access SQLite database.
   s.dependency 'SQLCipher', '4.4.2'
   
   s.platform = :ios, '8.0'
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'HEADER_SEARCH_PATHS' => 'SQLCipher',
+    'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64'
+  }
 end
 
