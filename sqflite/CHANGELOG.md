@@ -1,3 +1,6 @@
+## 2.0.0-nullsafety.0
+* NNBD support
+
 ## 1.1.4
 
 * Update names in ios native implementation to avoid conflicts with the `sqflite` package
