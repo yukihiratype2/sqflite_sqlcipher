@@ -15,9 +15,9 @@ void run(SqfliteTestContext context) {
       //await Sqflite.setDebugModeOn(true);
 
       // Our database path
-      String path;
+      late String path;
       // Our database once opened
-      Database db;
+      Database? db;
 
       try {
         /// Let's use FOREIGN KEY CONSTRAIN
@@ -49,7 +49,7 @@ void run(SqfliteTestContext context) {
                   onConfigure: onConfigure,
                   onDowngrade: onDatabaseDowngradeDelete));
 
-          await db.close();
+          await db!.close();
           db = null;
         }
 
@@ -110,16 +110,16 @@ void run(SqfliteTestContext context) {
                   },
                   onDowngrade: onDatabaseDowngradeDelete));
 
-          await db.close();
+          await db!.close();
           db = null;
         }
 
         Future _readTest() async {
           db ??= await factory.openDatabase(path);
-          expect(await db.query('Company'), [
+          expect(await db!.query('Company'), [
             {'name': 'Watch', 'description': 'Black Wristatch', 'id': 1}
           ]);
-          expect(await db.query('Employee'), [
+          expect(await db!.query('Employee'), [
             {'name': '1st Employee', 'companyId': 1, 'id': 1}
           ]);
         }
@@ -127,11 +127,11 @@ void run(SqfliteTestContext context) {
         Future _test() async {
           db = await factory.openDatabase(path);
           try {
-            var companyId = await db.insert('Company', <String, dynamic>{
+            var companyId = await db!.insert('Company', <String, Object?>{
               'name': 'Watch',
               'description': 'Black Wristatch'
             });
-            await db.insert('Employee', <String, dynamic>{
+            await db!.insert('Employee', <String, Object?>{
               'name': '1st Employee',
               'companyId': companyId
             });
@@ -176,18 +176,18 @@ void run(SqfliteTestContext context) {
     });
 
     test('record map', () async {
-      var map = <String, dynamic>{
+      var map = <String, Object?>{
         'title': 'Table',
-        'size': <String, dynamic>{'width': 80, 'height': 80}
+        'size': <String, Object?>{'width': 80, 'height': 80}
       };
 
-      map = <String, dynamic>{'title': 'Table', 'width': 80, 'height': 80};
+      map = <String, Object?>{'title': 'Table', 'width': 80, 'height': 80};
 
-      map = <String, dynamic>{
+      map = <String, Object?>{
         'title': 'Table',
-        'size': jsonEncode(<String, dynamic>{'width': 80, 'height': 80})
+        'size': jsonEncode(<String, Object?>{'width': 80, 'height': 80})
       };
-      final map2 = <String, dynamic>{
+      final map2 = <String, Object?>{
         'title': 'Table',
         'size': '{"width":80,"height":80}'
       };
@@ -220,14 +220,13 @@ CREATE TABLE Product (
                 },
                 onDowngrade: onDatabaseDowngradeDelete));
 
-        var map = <String, dynamic>{
+        var map = <String, Object?>{
           'title': 'Table',
           'width': 80,
           'height': 80
         };
         await db.insert('Product', map);
         await db.close();
-        db = null;
       }
 
       {
@@ -252,16 +251,16 @@ CREATE TABLE Product (
                 },
                 onDowngrade: onDatabaseDowngradeDelete));
 
-        var map = <String, dynamic>{
+        var map = <String, Object?>{
           'title': 'Table',
           'size': '{"width":80,"height":80}'
         };
         await db.insert('Product', map);
         await db.close();
-        db = null;
       }
     });
     test('upsert', () async {
+      // await factory.setLogLevel(sqfliteLogLevelVerbose);
       var path = inMemoryDatabasePath;
 
       {
@@ -289,13 +288,13 @@ CREATE TABLE Product (
           return firstIntValue(await txn.query('Product',
                   columns: ['COUNT(*)'],
                   where: 'id = ?',
-                  whereArgs: [product.id])) ==
+                  whereArgs: [product.id!])) ==
               1;
         }
 
         Future _update(Transaction txn, Product product) async {
           await txn.update('Product', product.toMap(),
-              where: 'id = ?', whereArgs: [product.id]);
+              where: 'id = ?', whereArgs: [product.id!]);
         }
 
         Future _insert(Transaction txn, Product product) async {
@@ -321,7 +320,6 @@ CREATE TABLE Product (
         var result = await db.query('Product');
         expect(result.length, 1, reason: 'list $result');
         await db.close();
-        db = null;
       }
     });
 
@@ -351,7 +349,7 @@ CREATE TABLE Product (
 
         Future _update(Product product) async {
           await db.update('Product', product.toMap(),
-              where: 'id = ?', whereArgs: [product.id]);
+              where: 'id = ?', whereArgs: [product.id!]);
         }
 
         Future _insert(Product product) async {
@@ -379,7 +377,6 @@ CREATE TABLE Product (
         var result = await db.query('Product');
         expect(result.length, 1, reason: 'list $result');
         await db.close();
-        db = null;
       }
     });
   });
@@ -388,13 +385,13 @@ CREATE TABLE Product (
 /// Test product.
 class Product {
   /// id.
-  String id;
+  String? id;
 
   /// title.
-  String title;
+  String? title;
 
   /// Export as a map.
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{'title': title};
+  Map<String, Object?> toMap() {
+    return <String, Object?>{'title': title};
   }
 }

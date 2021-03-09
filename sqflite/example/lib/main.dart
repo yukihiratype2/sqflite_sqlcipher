@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_example/batch_test_page.dart';
 import 'package:sqflite_example/deprecated_test_page.dart';
 import 'package:sqflite_example/exception_test_page.dart';
@@ -99,7 +97,7 @@ class _MyAppState extends State<MyApp> {
 /// App home menu page.
 class MyHomePage extends StatefulWidget {
   /// App home menu page.
-  MyHomePage({Key key, this.title}) : super(key: key) {
+  MyHomePage({Key? key, this.title}) : super(key: key) {
     _items.add(
         MainItem('Raw tests', 'Raw SQLite operations', route: testRawRoute));
     _items.add(MainItem('Open tests', 'Open onCreate/onUpgrade/onDowngrade',
@@ -130,67 +128,46 @@ class MyHomePage extends StatefulWidget {
   final List<MainItem> _items = [];
 
   /// Page title.
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-String _debugAutoStartRouteName;
+String? _debugAutoStartRouteName;
 
 /// (debug) set the route to start with.
-String get debugAutoStartRouteName => _debugAutoStartRouteName;
+String? get debugAutoStartRouteName => _debugAutoStartRouteName;
 
 /// Deprecated to avoid calls
 @deprecated
-set debugAutoStartRouteName(String routeName) =>
+set debugAutoStartRouteName(String? routeName) =>
     _debugAutoStartRouteName = routeName;
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _platformVersion = 'Unknown';
-
   int get _itemCount => widget._items.length;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      // ignore: deprecated_member_use
-      platformVersion = await Sqflite.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version';
-    }
+    Future.delayed(Duration.zero).then((_) async {
+      if (mounted) {
+        // Use it to auto start a test page
+        if (debugAutoStartRouteName != null) {
+          // only once
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
+          // await Navigator.of(context).pushNamed(testExpRoute);
+          // await Navigator.of(context).pushNamed(testRawRoute);
+          var future =
+              Navigator.of(context).pushNamed(debugAutoStartRouteName!);
+          // ignore: deprecated_member_use_from_same_package
+          debugAutoStartRouteName = null;
+          await future;
+          // await Navigator.of(context).pushNamed(testExceptionRoute);
+        }
+      }
     });
-
-    print('running on: ' + _platformVersion);
-
-    // Use it to auto start a test page
-    if (debugAutoStartRouteName != null) {
-      // only once
-
-      // await Navigator.of(context).pushNamed(testExpRoute);
-      // await Navigator.of(context).pushNamed(testRawRoute);
-      var future = Navigator.of(context).pushNamed(debugAutoStartRouteName);
-      // ignore: deprecated_member_use_from_same_package
-      debugAutoStartRouteName = null;
-      await future;
-      // await Navigator.of(context).pushNamed(testExceptionRoute);
-    }
   }
 
   @override
@@ -208,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _itemBuilder(BuildContext context, int index) {
     return MainItemWidget(widget._items[index], (MainItem item) {
-      Navigator.of(context).pushNamed(item.route);
+      Navigator.of(context).pushNamed(item.route!);
     });
   }
 }

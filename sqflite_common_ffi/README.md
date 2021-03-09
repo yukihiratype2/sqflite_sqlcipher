@@ -1,6 +1,6 @@
 # sqflite ffi
 
-[sqflite](https://pub.dev/packages/sqflite) based ffi implementation. Based on [`moor_ffi`](https://pub.dev/packages/moor_ffi). Thanks to [Simon Binder](https://github.com/simolus3)
+[sqflite](https://pub.dev/packages/sqflite) based ffi implementation. Based on [`sqlite3`](https://pub.dev/packages/sqlite3). Thanks to [Simon Binder](https://github.com/simolus3)
 
 It allows mocking sqflite during regular flutter unit test (i.e. not using the emulator/simulator).
 One goal is make it stricter than sqflite to encourage good practices.
@@ -34,7 +34,9 @@ Should work as is.
 
 ### Windows
 
-Should work as is (`sqlite3.dll` is bundled).
+Should work as is in debug mode (`sqlite3.dll` is bundled).
+
+In release mode, add [sqlite3.dll](https://github.com/tekartik/sqflite/raw/master/sqflite_common_ffi/lib/src/windows/sqlite3.dll) in same folder as your executable.
 
 ## Sample code
 
@@ -79,8 +81,8 @@ Future main() async {
       title TEXT
   )
   ''');
-  await db.insert('Product', <String, dynamic>{'title': 'Product 1'});
-  await db.insert('Product', <String, dynamic>{'title': 'Product 1'});
+  await db.insert('Product', <String, Object?>{'title': 'Product 1'});
+  await db.insert('Product', <String, Object?>{'title': 'Product 1'});
 
   var result = await db.query('Product');
   print(result);
@@ -91,9 +93,6 @@ Future main() async {
 
 ## Limitations
 
-* Primary intent was to support unit testing sqflite based code.
-* Database calls are made in the foreground isolate so don't make fancy lock mechanism,
-* Only `Uint8List` is accepted for blob since `List<int>` is not optimized
-* read-only support is limited and faked so some command might still
- work (such as `PRAGMA user_version = 4`), insert, update, delete will be prevented though
+* Primary intent was to support unit testing sqflite based code but the implementation works on Windows/Mac/Linux flutter desktop application
+* Database calls are made in a separate isolate,
 * Multi-instance support (not common) is simulated

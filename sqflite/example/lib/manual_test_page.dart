@@ -15,7 +15,7 @@ class ManualTestPage extends StatefulWidget {
 }
 
 class _ManualTestPageState extends State<ManualTestPage> {
-  Database database;
+  Database? database;
   static const String dbName = 'manual_test.db';
 
   Future<Database> _openDatabase() async {
@@ -32,13 +32,13 @@ class _ManualTestPageState extends State<ManualTestPage> {
   }
 
   Future _incrementVersion() async {
-    var version = await database.getVersion();
+    var version = await database!.getVersion();
     print('version $version');
-    await database.setVersion(version + 1);
+    await database!.setVersion(version + 1);
   }
 
-  List<MenuItem> items;
-  List<ItemWidget> itemWidgets;
+  late List<MenuItem> items;
+  late List<ItemWidget> itemWidgets;
 
   Future<bool> pop() async {
     return true;
@@ -88,7 +88,7 @@ class _ManualTestPageState extends State<ManualTestPage> {
       MenuItem('Get info', () async {
         final factory = databaseFactory as impl.SqfliteDatabaseFactoryMixin;
         var info = await factory.getDebugInfo();
-        print(info?.toString());
+        print(info.toString());
       }, summary: 'Implementation info (dev only)'),
       MenuItem('Increment version', () async {
         print(await _incrementVersion());
@@ -126,10 +126,11 @@ class _ManualTestPageState extends State<ManualTestPage> {
         title: Text('Manual tests'),
       ),
       body: WillPopScope(
-          child: ListView(
-            children: itemWidgets,
-          ),
-          onWillPop: pop),
+        onWillPop: pop,
+        child: ListView(
+          children: itemWidgets,
+        ),
+      ),
     );
   }
 }
@@ -169,7 +170,7 @@ class MultipleDbTestPage extends StatelessWidget {
 /// Simple db test page.
 class SimpleDbTestPage extends StatefulWidget {
   /// Simple db test page.
-  const SimpleDbTestPage({Key key, this.dbName}) : super(key: key);
+  const SimpleDbTestPage({Key? key, required this.dbName}) : super(key: key);
 
   /// db name.
   final String dbName;
@@ -179,7 +180,7 @@ class SimpleDbTestPage extends StatefulWidget {
 }
 
 class _SimpleDbTestPageState extends State<SimpleDbTestPage> {
-  Database database;
+  Database? database;
 
   Future<Database> _openDatabase() async {
     // await Sqflite.devSetOptions(SqfliteOptions(logLevel: sqfliteLogLevelVerbose));
@@ -210,7 +211,7 @@ class _SimpleDbTestPageState extends State<SimpleDbTestPage> {
         body: Builder(
           builder: (context) {
             Widget menuItem(String title, void Function() onTap,
-                {String summary}) {
+                {String? summary}) {
               return ListTile(
                 title: Text(title),
                 subtitle: summary == null ? null : Text(summary),
@@ -220,8 +221,10 @@ class _SimpleDbTestPageState extends State<SimpleDbTestPage> {
 
             Future _countRecord() async {
               var db = await _openDatabase();
-              var result = await firstIntValue(
-                  await db.query('test', columns: ['COUNT(*)']));
+              var result =
+                  firstIntValue(await db.query('test', columns: ['COUNT(*)']));
+              // Temp for nnbd successfull lint
+              // ignore: deprecated_member_use
               Scaffold.of(context).showSnackBar(SnackBar(
                 content: Text('$result records'),
                 duration: Duration(milliseconds: 700),
@@ -244,6 +247,12 @@ class _SimpleDbTestPageState extends State<SimpleDbTestPage> {
                 'Close Database',
                 () async {
                   await _closeDatabase();
+                },
+              ),
+              menuItem(
+                'Delete database',
+                () async {
+                  await databaseFactory.deleteDatabase(widget.dbName);
                 },
               ),
             ];

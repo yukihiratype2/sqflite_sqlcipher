@@ -61,14 +61,14 @@ class SqlBuilder {
   /// @param whereArgs You may include ?s in the where clause, which
   ///            will be replaced by the values from whereArgs. The values
   ///            will be bound as Strings.
-  SqlBuilder.delete(String table, {String where, List<dynamic> whereArgs}) {
+  SqlBuilder.delete(String table, {String? where, List<Object?>? whereArgs}) {
     checkWhereArgs(whereArgs);
     final delete = StringBuffer();
     delete.write('DELETE FROM ');
     delete.write(_escapeName(table));
     _writeClause(delete, ' WHERE ', where);
     sql = delete.toString();
-    arguments = whereArgs != null ? List<dynamic>.from(whereArgs) : null;
+    arguments = whereArgs != null ? List<Object?>.from(whereArgs) : null;
   }
 
   /// Build an SQL query string from the given clauses.
@@ -95,15 +95,15 @@ class SqlBuilder {
   /// @param limit Limits the number of rows returned by the query,
   ///            formatted as LIMIT clause. Passing null denotes no LIMIT clause.
   SqlBuilder.query(String table,
-      {bool distinct,
-      List<String> columns,
-      String where,
-      List<dynamic> whereArgs,
-      String groupBy,
-      String having,
-      String orderBy,
-      int limit,
-      int offset}) {
+      {bool? distinct,
+      List<String>? columns,
+      String? where,
+      List<Object?>? whereArgs,
+      String? groupBy,
+      String? having,
+      String? orderBy,
+      int? limit,
+      int? offset}) {
     if (groupBy == null && having != null) {
       throw ArgumentError(
           'HAVING clauses are only permitted when using a groupBy clause');
@@ -135,7 +135,7 @@ class SqlBuilder {
     }
 
     sql = query.toString();
-    arguments = whereArgs != null ? List<dynamic>.from(whereArgs) : null;
+    arguments = whereArgs != null ? List<Object?>.from(whereArgs) : null;
   }
 
   /// Convenience method for inserting a row into the database.
@@ -144,8 +144,8 @@ class SqlBuilder {
   /// @nullColumnHack optional; may be null. SQL doesn't allow inserting a completely empty row without naming at least one column name. If your provided values is empty, no column names are known and an empty row can't be inserted. If not set to null, the nullColumnHack parameter provides the name of nullable column name to explicitly insert a NULL into in the case where your values is empty.
   /// @values this map contains the initial column values for the row. The keys should be the column names and the values the column values
 
-  SqlBuilder.insert(String table, Map<String, dynamic> values,
-      {String nullColumnHack, ConflictAlgorithm conflictAlgorithm}) {
+  SqlBuilder.insert(String table, Map<String, Object?> values,
+      {String? nullColumnHack, ConflictAlgorithm? conflictAlgorithm}) {
     final insert = StringBuffer();
     insert.write('INSERT');
     if (conflictAlgorithm != null) {
@@ -155,26 +155,27 @@ class SqlBuilder {
     insert.write(_escapeName(table));
     insert.write(' (');
 
-    List<dynamic> bindArgs;
-    final size = (values != null) ? values.length : 0;
+    List<Object?>? bindArgs;
+    final size = values.length;
 
     if (size > 0) {
       final sbValues = StringBuffer(') VALUES (');
 
-      bindArgs = <dynamic>[];
+      bindArgs = <Object?>[];
       var i = 0;
-      values.forEach((String colName, dynamic value) {
+      values.forEach((String colName, Object? value) {
         if (i++ > 0) {
           insert.write(', ');
           sbValues.write(', ');
         }
 
+        /// This should be just a column name
         insert.write(_escapeName(colName));
         if (value == null) {
           sbValues.write('NULL');
         } else {
           checkNonNullValue(value);
-          bindArgs.add(value);
+          bindArgs!.add(value);
           sbValues.write('?');
         }
       });
@@ -203,11 +204,11 @@ class SqlBuilder {
   ///            will be bound as Strings.
   /// @param conflictAlgorithm for update conflict resolver
 
-  SqlBuilder.update(String table, Map<String, dynamic> values,
-      {String where,
-      List<dynamic> whereArgs,
-      ConflictAlgorithm conflictAlgorithm}) {
-    if (values == null || values.isEmpty) {
+  SqlBuilder.update(String table, Map<String, Object?> values,
+      {String? where,
+      List<Object?>? whereArgs,
+      ConflictAlgorithm? conflictAlgorithm}) {
+    if (values.isEmpty) {
       throw ArgumentError('Empty values');
     }
     checkWhereArgs(whereArgs);
@@ -220,13 +221,13 @@ class SqlBuilder {
     update.write(' ${_escapeName(table)}');
     update.write(' SET ');
 
-    final bindArgs = <dynamic>[];
+    final bindArgs = <Object?>[];
     var i = 0;
 
     values.keys.forEach((String colName) {
       update.write((i++ > 0) ? ', ' : '');
       update.write(_escapeName(colName));
-      final dynamic value = values[colName];
+      final value = values[colName];
       if (value != null) {
         checkNonNullValue(value);
         bindArgs.add(value);
@@ -247,26 +248,17 @@ class SqlBuilder {
   }
 
   /// The resulting SQL command.
-  String sql;
+  late String sql;
 
   /// The arguments list;
-  List<dynamic> arguments;
+  List<Object?>? arguments;
 
   /// Used during build if there was a name with an escaped keyword.
   bool hasEscape = false;
 
-  String _escapeName(String name) {
-    if (name == null) {
-      return name;
-    }
-    if (escapeNames.contains(name.toLowerCase())) {
-      hasEscape = true;
-      return _doEscape(name);
-    }
-    return name;
-  }
+  String _escapeName(String name) => escapeName(name);
 
-  void _writeClause(StringBuffer s, String name, String clause) {
+  void _writeClause(StringBuffer s, String name, String? clause) {
     if (clause != null) {
       s.write(name);
       s.write(clause);
@@ -281,12 +273,10 @@ class SqlBuilder {
     for (var i = 0; i < n; i++) {
       final column = columns[i];
 
-      if (column != null) {
-        if (i > 0) {
-          s.write(', ');
-        }
-        s.write(_escapeName(column));
+      if (i > 0) {
+        s.write(', ');
       }
+      s.write(_escapeName(column));
     }
     s.write(' ');
   }
@@ -294,16 +284,11 @@ class SqlBuilder {
 
 /// True if a name had been escaped already.
 bool isEscapedName(String name) {
-  if (name != null && name.length >= 2) {
-    final first = name[0];
-    final last = name[name.length - 1];
-    if (first == last) {
-      switch (first) {
-        case '"':
-        case '`':
-          return escapeNames
-              .contains('${name.substring(1, name.length - 1).toLowerCase()}');
-      }
+  if (name.length >= 2) {
+    final codeUnits = name.codeUnits;
+    if (_areCodeUnitsEscaped(codeUnits)) {
+      return escapeNames
+          .contains('${name.substring(1, name.length - 1).toLowerCase()}');
     }
   }
   return false;
@@ -318,9 +303,6 @@ String _doEscape(String name) => '"$name"';
 /// i.e. if it is an identified it will be surrounded by " (double-quote)
 /// Only some name belonging to keywords can be escaped
 String escapeName(String name) {
-  if (name == null) {
-    return name;
-  }
   if (escapeNames.contains(name.toLowerCase())) {
     return _doEscape(name);
   }
@@ -330,6 +312,89 @@ String escapeName(String name) {
 /// Unescape a table or column name.
 String unescapeName(String name) {
   if (isEscapedName(name)) {
+    return name.substring(1, name.length - 1);
+  }
+  return name;
+}
+
+/// Escape a column name if necessary.
+///
+/// Only for insert and update keys
+String escapeEntityName(String name) {
+  if (_entityNameNeedEscape(name)) {
+    return _doEscape(name);
+  }
+  return name;
+}
+
+const _lowercaseA = 0x61;
+const _lowercaseZ = 0x7A;
+
+const _underscore = 0x5F;
+const _digit0 = 0x30;
+const _digit9 = 0x39;
+
+const _backtick = 0x60;
+const _doubleQuote = 0x22;
+const _singleQuote = 0x27;
+
+const _uppercaseA = 0x41;
+const _uppercaseZ = 0x5A;
+
+/// Returns `true` if [codeUnit] represents a digit.
+///
+/// The definition of digit matches the Unicode `0x3?` range of Western
+/// European digits.
+bool _isDigit(int codeUnit) => codeUnit >= _digit0 && codeUnit <= _digit9;
+
+/// Returns `true` if [codeUnit] represents matchs azAZ_.
+bool _isAlphaOrUnderscore(int codeUnit) =>
+    (codeUnit >= _lowercaseA && codeUnit <= _lowercaseZ) ||
+    (codeUnit >= _uppercaseA && codeUnit <= _uppercaseZ) ||
+    codeUnit == _underscore;
+
+/// True if already escaped
+bool _areCodeUnitsEscaped(List<int> codeUnits) {
+  if (codeUnits.isNotEmpty) {
+    final first = codeUnits.first;
+    switch (first) {
+      case _doubleQuote:
+      case _backtick:
+        final last = codeUnits.last;
+        return last == first;
+      case _singleQuote:
+      // not yet
+    }
+  }
+  return false;
+}
+
+bool _entityNameNeedEscape(String name) {
+  /// We need to escape if not escaped yet and if not a valid keyword
+  if (escapeNames.contains(name.toLowerCase())) {
+    return true;
+  }
+
+  final codeUnits = name.codeUnits;
+
+  // Must start with a alpha or underscode
+  if (!_isAlphaOrUnderscore(codeUnits.first)) {
+    return true;
+  }
+  for (var i = 1; i < codeUnits.length; i++) {
+    final codeUnit = codeUnits[i];
+    if (!_isAlphaOrUnderscore(codeUnit) && !_isDigit(codeUnit)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/// Unescape a table or column name.
+String unescapeValueKeyName(String name) {
+  final codeUnits = name.codeUnits;
+  if (_areCodeUnitsEscaped(codeUnits)) {
     return name.substring(1, name.length - 1);
   }
   return name;

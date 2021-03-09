@@ -14,17 +14,17 @@ class SqfliteOptions {
 
   // true =<0.7.0
   /// deprecated
-  bool queryAsMapList;
+  bool? queryAsMapList;
 
   /// deprecated
-  int androidThreadPriority;
+  int? androidThreadPriority;
 
   /// deprecated
-  int logLevel;
+  int? logLevel;
 
   /// deprecated
-  Map<String, dynamic> toMap() {
-    final map = <String, dynamic>{};
+  Map<String, Object?> toMap() {
+    final map = <String, Object?>{};
     if (queryAsMapList != null) {
       map['queryAsMapList'] = queryAsMapList;
     }
@@ -38,7 +38,7 @@ class SqfliteOptions {
   }
 
   /// deprecated
-  void fromMap(Map<String, dynamic> map) {
+  void fromMap(Map<String, Object?> map) {
     final dynamic queryAsMapList = map['queryAsMapList'];
     if (queryAsMapList is bool) {
       this.queryAsMapList = queryAsMapList;

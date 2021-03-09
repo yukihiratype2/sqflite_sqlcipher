@@ -9,13 +9,13 @@ var _debugCheckPrinted = <String, bool>{};
 
 void _checkArg(dynamic arg) {
   if (!(arg is String) && !(arg is num) && !(arg is Uint8List)) {
-    final type = arg?.runtimeType?.toString() ?? 'Null';
+    final type = arg.runtimeType.toString();
 
     final text = '''
 *** WARNING ***
 
 Invalid argument $arg with type $type.
-Only num, String and Uint8List are supported. See https://github.com/tekartik/sqflite_common/blob/master/sqflite_common/doc/supported_types.md for details
+Only num, String and Uint8List are supported. See https://github.com/tekartik/sqflite/blob/master/sqflite/doc/supported_types.md for details
 
 This will throw an exception in the future. For now it is displayed once per type.
 
@@ -40,7 +40,7 @@ void checkNonNullValue(dynamic value) {
 }
 
 /// Check whether the args are valid in raw statement. null is supported here
-void checkRawArgs(List<dynamic> args) {
+void checkRawArgs(List<dynamic>? args) {
   if (isDebug) {
     args?.forEach((arg) {
       if (arg != null) {
@@ -51,7 +51,7 @@ void checkRawArgs(List<dynamic> args) {
 }
 
 /// Check whether the where args are valid. null is not supported here.
-void checkWhereArgs(List<dynamic> args) {
+void checkWhereArgs(List<dynamic>? args) {
   if (isDebug) {
     args?.forEach((arg) {
       _checkArg(arg);

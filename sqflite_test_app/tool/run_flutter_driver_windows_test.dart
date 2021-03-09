@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'package:process_run/shell.dart';
 
 Future<void> main() async {
@@ -5,7 +6,7 @@ Future<void> main() async {
 
   await shell.run('''
 
-flutter driver --target=test_driver/main.dart
+flutter driver --target=test_driver/main.dart -d windows
 
 ''');
 }

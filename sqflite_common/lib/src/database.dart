@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common/src/batch.dart';
 import 'package:sqflite_common/src/factory.dart';
@@ -8,7 +6,7 @@ import 'package:sqflite_common/src/transaction.dart';
 /// Base database executor.
 abstract class SqfliteDatabaseExecutor implements DatabaseExecutor {
   /// Executor transaction if any.
-  SqfliteTransaction get txn;
+  SqfliteTransaction? get txn;
 
   /// Executor database.
   SqfliteDatabase get db;
@@ -23,13 +21,13 @@ class SqfliteDatabaseOpenHelper {
   final SqfliteDatabaseFactory factory;
 
   /// Open options
-  final OpenDatabaseOptions options;
+  final OpenDatabaseOptions? options;
 
   /// Our database pathy
   final String path;
 
   /// The database once opened.
-  SqfliteDatabase sqfliteDatabase;
+  SqfliteDatabase? sqfliteDatabase;
 
   /// Creates a new database object.
   SqfliteDatabase newDatabase(String path) => factory.newDatabase(this, path);
@@ -43,22 +41,19 @@ class SqfliteDatabaseOpenHelper {
   Future<SqfliteDatabase> openDatabase() async {
     if (!isOpen) {
       final database = newDatabase(path);
-      await database.doOpen(options);
+      await database.doOpen(options!);
       sqfliteDatabase = database;
     }
-    return sqfliteDatabase;
+    return sqfliteDatabase!;
   }
 
   /// Open the database if opened.
   Future<void> closeDatabase(SqfliteDatabase sqfliteDatabase) async {
-    if (isOpen) {
-      if (!isOpen) {
-        return;
-      } else {
-        await sqfliteDatabase.doClose();
-        this.sqfliteDatabase = null;
-      }
+    if (!isOpen) {
+      return;
     }
+    await sqfliteDatabase.doClose();
+    this.sqfliteDatabase = null;
   }
 }
 
@@ -72,37 +67,37 @@ abstract class SqfliteDatabase extends SqfliteDatabaseExecutor
   Future<void> doClose();
 
   /// Database internal id.
-  int id;
+  int? id;
 
   /// Open options.
-  OpenDatabaseOptions options;
+  OpenDatabaseOptions? options;
 
   /// Begin a transaction.
-  Future<SqfliteTransaction> beginTransaction({bool exclusive});
+  Future<SqfliteTransaction> beginTransaction({bool? exclusive});
 
   /// Ends a transaction.
   Future<void> endTransaction(SqfliteTransaction txn);
 
   /// Commit a batch.
-  Future<List<dynamic>> txnApplyBatch(
+  Future<List<Object?>> txnApplyBatch(
       SqfliteTransaction txn, SqfliteBatch batch,
-      {bool noResult, bool continueOnError});
+      {bool? noResult, bool? continueOnError});
 
   /// Execute a command.
-  Future<T> txnExecute<T>(SqfliteTransaction txn, String sql,
-      [List<dynamic> arguments]);
+  Future<T> txnExecute<T>(SqfliteTransaction? txn, String sql,
+      [List<Object?>? arguments]);
 
   /// Execute a raw INSERT command.
   Future<int> txnRawInsert(
-      SqfliteTransaction txn, String sql, List<dynamic> arguments);
+      SqfliteTransaction? txn, String sql, List<Object?>? arguments);
 
   /// Execute a raw SELECT command.
-  Future<List<Map<String, dynamic>>> txnRawQuery(
-      SqfliteTransaction txn, String sql, List<dynamic> arguments);
+  Future<List<Map<String, Object?>>> txnRawQuery(
+      SqfliteTransaction? txn, String sql, List<Object?>? arguments);
 
   /// Execute a raw UPDATE/DELETE command.
   Future<int> txnRawUpdate(
-      SqfliteTransaction txn, String sql, List<dynamic> arguments);
+      SqfliteTransaction? txn, String sql, List<Object?>? arguments);
 
   /// Check if a database is not closed.
   ///

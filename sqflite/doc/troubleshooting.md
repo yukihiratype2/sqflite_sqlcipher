@@ -28,14 +28,14 @@ analyzer:
 ## Cast error
 
 ```
-Unhandled exception: type '_InternalLinkedHashMap' is not a subtype of type 'Map<String, dynamic>'
+Unhandled exception: type '_InternalLinkedHashMap' is not a subtype of type 'Map<String, Object?>'
  where
   _InternalLinkedHashMap is from dart:collection
   Map is from dart:core
   String is from dart:core
 ```
 
-Make sure you create object of type `Map<String, dynamic>` and not simply `Map` for records you
+Make sure you create object of type `Map<String, Object?>` and not simply `Map` for records you
 insert and update. The option `implicit-casts: false` explained above helps to find such issues
 
 ## MissingPluginException
@@ -43,14 +43,17 @@ insert and update. The option `implicit-casts: false` explained above helps to f
 This error is typically a build/setup error after adding the dependency.
 
 - Try all the steps defined at the top of the documents
-- Make sure you stop the current running application if any
+- Make sure you stop the current running application if any (hot restart/reload won't work)
 - Force a `flutter packages get`
 - Try to clean your build folder `flutter clean`
 - On iOS, you can try to force a `pod install` / `pod update`
+- Follow the [using package flutter guide](https://flutter.dev/docs/development/packages-and-plugins/using-packages)
 - Search for [other bugs in flutter](https://github.com/flutter/flutter/search?q=MissingPluginException&type=Issues) 
   like this, other people face the same issue with other plugins so it is likely not sqflite related 
-  
+
 Advanced checks:
+- If you are using sqflite in a FCM Messaging context, you might need to [register the plugin earlier](https://github.com/tekartik/sqflite/issues/446).
+- if the project was generated a long time ago (2019), you might have to follow the [plugin migration guide](https://flutter.dev/docs/development/packages-and-plugins/plugin-api-migration)
 - Check the GeneratedPluginRegistrant file that flutter run should have generated in your project contains
   a line registering the plugin.
   
@@ -83,6 +86,9 @@ Advanced checks:
     return [super application:application didFinishLaunchingWithOptions:launchOptions];
   }
   ```
+- If it happens to Android release mode, make sure to [remove shrinkResources 
+  true and minifyEnabled true lines in build.gradle](https://github.com/tekartik/sqflite/issues/452#issuecomment-655602329) to solve the problem.
+
 Before raising this issue, try adding another well established plugin (the simplest being 
 `path_provider` or `shared_preferences`) to see if you get the error here as well.
 

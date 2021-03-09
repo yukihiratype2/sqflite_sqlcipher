@@ -8,7 +8,7 @@ import 'package:sqflite_common_test/sqflite_test.dart';
 import 'package:test/test.dart';
 
 class _Data {
-  Database db;
+  late Database db;
 }
 
 final _Data _data = _Data();
@@ -20,13 +20,13 @@ Future<dynamic> _getValue(int id) async {
 
 // insert the value field and return the id
 Future<int> _insertValue(dynamic value) async {
-  return await _data.db.insert('Test', <String, dynamic>{'value': value});
+  return await _data.db.insert('Test', <String, Object?>{'value': value});
 }
 
 // insert the value field and return the id
 Future<int> _updateValue(int id, dynamic value) async {
   return await _data.db
-      .update('Test', <String, dynamic>{'value': value}, where: '_id = $id');
+      .update('Test', <String, Object?>{'value': value}, where: '_id = $id');
 }
 
 /// Run type tests.
@@ -172,9 +172,11 @@ void run(SqfliteTestContext context) {
                 await db.execute(
                     'CREATE TABLE Test (_id INTEGER PRIMARY KEY, value BLOB)');
               }));
+      int id;
+      dynamic value;
       try {
         // insert text in blob
-        var id = await _insertValue('simple text');
+        id = await _insertValue('simple text');
         expect(await _getValue(id), 'simple text');
 
         // null
@@ -188,9 +190,10 @@ void run(SqfliteTestContext context) {
         id = await _insertValue(blob);
         //print(await getValue(id));
         var result = (await _getValue(id)) as List;
-        print(result.runtimeType);
+        // print(result.runtimeType);
         // this is not true when sqflite server
-        expect(result is Uint8List, true);
+        expect(result, const TypeMatcher<Uint8List>());
+
         // expect(result is List, true);
         expect(result.length, 1);
         expect(result, [1]);
@@ -201,7 +204,7 @@ void run(SqfliteTestContext context) {
             .rawInsert("INSERT INTO Test(value) VALUES ( X'deadbeef' )");
         var blobRead = await _getValue(id);
         expect(blobRead, const TypeMatcher<Uint8List>());
-        print('${blobRead.length}');
+        // print('${blobRead.length}');
         expect(await _getValue(id), [0xDE, 0xAD, 0xBE, 0xEF],
             reason: '${await _getValue(id)}');
         // empty array not supported
@@ -211,27 +214,27 @@ void run(SqfliteTestContext context) {
 
         final blob1234 = Uint8List.fromList([1, 2, 3, 4]);
         id = await _insertValue(blob1234);
-        print(await _getValue(id));
-        print('${(await _getValue(id)).length}');
+        // print(await _getValue(id));
+        // print('${(await _getValue(id)).length}');
         expect(await _getValue(id), blob1234, reason: '${await _getValue(id)}');
 
         if (!context.strict) {
           final blob1234Int = [1, 2, 3, 4];
           id = await _insertValue(blob1234Int);
-          print(await _getValue(id));
-          print('${(await _getValue(id)).length}');
+          // print(await _getValue(id));
+          // print('${(await _getValue(id)).length}');
           expect(await _getValue(id), blob1234Int,
               reason: '${await _getValue(id)}');
         }
 
         // test hex feature on sqlite
-        var hexResult = await _data.db.rawQuery(
-            'SELECT hex(value) FROM Test WHERE _id = ?', <dynamic>[id]);
+        var hexResult = await _data.db
+            .rawQuery('SELECT hex(value) FROM Test WHERE _id = ?', [id]);
         expect(hexResult[0].values.first, '01020304');
 
         // try blob lookup - does work but on Android
-        var rows = await _data.db.rawQuery(
-            'SELECT * FROM Test WHERE value = ?', <dynamic>[blob1234]);
+        var rows = await _data.db
+            .rawQuery('SELECT * FROM Test WHERE value = ?', [blob1234]);
         if (context.isAndroid) {
           expect(rows.length, 0);
         } else if (context.isIOS || context.isMacOS || context.isLinux) {
@@ -240,10 +243,26 @@ void run(SqfliteTestContext context) {
 
         // try blob lookup using hex
         rows = await _data.db.rawQuery(
-            'SELECT * FROM Test WHERE hex(value) = ?',
-            <dynamic>[utils.hex(blob1234)]);
+            'SELECT * FROM Test WHERE hex(value) = ?', [utils.hex(blob1234)]);
         expect(rows.length, context.strict ? 1 : 2);
         expect(rows.last['_id'], id);
+
+        // Insert empty blob
+        final blobEmpty = Uint8List(0);
+
+        id = await _data.db.rawInsert("INSERT INTO Test(value) VALUES ( X'' )");
+        blobRead = await _getValue(id);
+        expect(blobRead, const TypeMatcher<Uint8List>());
+        // print('${blobRead.length}');
+        expect(blobRead, blobEmpty, reason: '$blobRead');
+
+        id = await _insertValue(blobEmpty);
+        value = await _getValue(id);
+        expect(value, const TypeMatcher<Uint8List>());
+        expect(value, isEmpty);
+        // print(await _getValue(id));
+        // print('${(await _getValue(id)).length}');
+        expect(value, blobEmpty, reason: '${await _getValue(id)}');
       } finally {
         await _data.db.close();
       }
@@ -309,7 +328,7 @@ void run(SqfliteTestContext context) {
                     ' value TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)');
               }));
       try {
-        var id = await _data.db.insert('Test', <String, dynamic>{'_id': 1});
+        var id = await _data.db.insert('Test', <String, Object?>{'_id': 1});
         expect(DateTime.parse(await _getValue(id) as String), isNotNull);
       } finally {
         await _data.db.close();

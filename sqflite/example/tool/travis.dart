@@ -1,8 +1,14 @@
+//
+// @dart = 2.9
+//
+// This is to allow running this file without null experiment
+// In the future, remove this 2.9 comment or run using: dart --enable-experiment=non-nullable --no-sound-null-safety run tool/travis.dart
+
 import 'package:path/path.dart';
 import 'package:process_run/shell.dart';
 import 'package:sqflite_example/utils.dart';
 
-import 'run_flutter_driver_test.dart' as driver;
+import 'run_integration_test.dart' as integration_test;
 
 Future<void> main() async {
   final shell = Shell();
@@ -10,13 +16,12 @@ Future<void> main() async {
   await shell.run('''
 
 flutter analyze
-flutter test
 
 ''');
 
-  var exception;
+  Object exception;
   try {
-    await driver.main();
+    await integration_test.main();
   } catch (e) {
     exception = e;
   }

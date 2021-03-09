@@ -1,6 +1,7 @@
 import 'dart:isolate';
 
-import 'package:meta/meta.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi/src/import.dart';
 import 'package:sqflite_common_ffi/src/method_call.dart';
 import 'package:sqflite_common_ffi/src/sqflite_ffi_exception.dart';
 
@@ -11,7 +12,7 @@ bool _debug = false; // devWarning(true); // false;
 /// Sqflite isolate.
 class SqfliteIsolate {
   /// Sqflite isolate.
-  SqfliteIsolate({@required this.sendPort});
+  SqfliteIsolate({required this.sendPort});
 
   /// Our send port.
   final SendPort sendPort;
@@ -19,7 +20,7 @@ class SqfliteIsolate {
   /// Handle a method call.
   Future<dynamic> handle(FfiMethodCall methodCall) async {
     var recvPort = ReceivePort();
-    var map = <String, dynamic>{
+    var map = <String, Object?>{
       'method': methodCall.method,
       'arguments': methodCall.arguments,
     };
@@ -39,8 +40,8 @@ class SqfliteIsolate {
         throw SqfliteFfiException(
             code: error['code'] as String,
             message: error['message'] as String,
-            details: (error['details'] as Map)?.cast<String, dynamic>(),
-            resultCode: error['resultCode'] as int);
+            details: (error['details'] as Map?)?.cast<String, Object?>(),
+            resultCode: error['resultCode'] as int?);
       }
       return response['result'];
     }
@@ -49,12 +50,12 @@ class SqfliteIsolate {
 }
 
 /// Create an isolate.
-Future<SqfliteIsolate> createIsolate() async {
+Future<SqfliteIsolate> createIsolate(SqfliteFfiInit? ffiInit) async {
   // create a long-lived port for receiving messages
   var ourFirstReceivePort = ReceivePort();
 
   // spawn the isolate with an initial sendPort.
-  await Isolate.spawn(_isolate, ourFirstReceivePort.sendPort);
+  await Isolate.spawn(_isolate, [ourFirstReceivePort.sendPort, ffiInit]);
 
   // the isolate sends us its SendPort as its first message.
   // this lets us communicate with it. we’ll always use this port to
@@ -65,10 +66,16 @@ Future<SqfliteIsolate> createIsolate() async {
 }
 
 /// The isolate
-Future _isolate(SendPort sendPort) async {
+Future _isolate(List<dynamic> args) async {
   // open our receive port. this is like turning on
   // our cellphone.
   var ourReceivePort = ReceivePort();
+
+  final sendPort = args[0] as SendPort;
+  final ffiInit = (args[1] as SqfliteFfiInit?);
+
+  // Initialize with the FFI callback if provided
+  ffiInit?.call();
 
   // tell whoever created us what port they can reach us on
   // (like giving them our phone number)
@@ -81,15 +88,15 @@ Future _isolate(SendPort sendPort) async {
     if (msg is Map) {
       var sendPort = msg['sendPort'];
       if (sendPort is SendPort) {
-        var method = msg['method'] as String;
+        var method = msg['method'] as String?;
         if (method != null) {
           try {
             var arguments = msg['arguments'];
             var methodCall = FfiMethodCall(method, arguments);
             var result = await methodCall.handleImpl();
             sendPort.send({'result': result});
-          } catch (e) {
-            var error = <String, dynamic>{};
+          } catch (e, st) {
+            var error = <String, Object?>{};
             if (e is SqfliteFfiException) {
               error['code'] = e.code;
               error['details'] = e.details;
@@ -98,6 +105,9 @@ Future _isolate(SendPort sendPort) async {
             } else {
               // should not happen
               error['message'] = e.toString();
+            }
+            if (isDebug) {
+              error['stackTrace'] = st.toString();
             }
             sendPort.send({'error': error});
           }

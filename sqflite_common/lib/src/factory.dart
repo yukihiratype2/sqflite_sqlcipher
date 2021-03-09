@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common/src/database.dart';
 import 'package:sqflite_common/src/mixin/factory.dart';
@@ -15,6 +13,7 @@ abstract class SqfliteDatabaseFactory
   //Future<T> safeInvokeMethod<T>(String method, [dynamic arguments]);
 
   /// open lock mechanism.
+  @deprecated
   final Lock lock = Lock();
 
   /// Create a new database object.
@@ -25,7 +24,7 @@ abstract class SqfliteDatabaseFactory
   void removeDatabaseOpenHelper(String path);
 
   @override
-  Future<Database> openDatabase(String path, {OpenDatabaseOptions options});
+  Future<Database> openDatabase(String path, {OpenDatabaseOptions? options});
 
   /// Close the database.
   ///

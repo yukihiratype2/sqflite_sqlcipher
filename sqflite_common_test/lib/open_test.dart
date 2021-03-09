@@ -8,9 +8,10 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common/utils/utils.dart' as utils;
 import 'package:sqflite_common_test/sqflite_test.dart';
 import 'package:synchronized/synchronized.dart';
+export 'package:sqflite_common/sqflite_dev.dart';
 
 /// Verify a condition in a test.
-bool verify(bool condition, [String message]) {
+bool verify(bool condition, [String? message]) {
   message ??= 'verify failed';
   expect(condition, true, reason: message);
   return condition;
@@ -43,13 +44,13 @@ class _OpenCallbacks {
     };
 
     onUpgrade = (Database db, int oldVersion, int newVersion) {
-      verify(onConfigureCalled, 'onConfigure not called in onUpgrade');
+      verify(onConfigureCalled!, 'onConfigure not called in onUpgrade');
       verify(!onUpgradeCalled, 'onUpgradeCalled already called');
       onUpgradeCalled = true;
     };
 
     onDowngrade = (Database db, int oldVersion, int newVersion) {
-      verify(onConfigureCalled, 'onConfigure not called');
+      verify(onConfigureCalled!, 'onConfigure not called');
       verify(!onDowngradeCalled, 'onDowngrade already called');
       onDowngradeCalled = true;
     };
@@ -58,17 +59,17 @@ class _OpenCallbacks {
   }
 
   final DatabaseFactory databaseFactory;
-  bool onConfigureCalled;
-  bool onOpenCalled;
-  bool onCreateCalled;
-  bool onDowngradeCalled;
-  bool onUpgradeCalled;
+  bool? onConfigureCalled;
+  bool? onOpenCalled;
+  bool? onCreateCalled;
+  late bool onDowngradeCalled;
+  late bool onUpgradeCalled;
 
-  OnDatabaseCreateFn onCreate;
-  OnDatabaseConfigureFn onConfigure;
-  OnDatabaseVersionChangeFn onDowngrade;
-  OnDatabaseVersionChangeFn onUpgrade;
-  OnDatabaseOpenFn onOpen;
+  late OnDatabaseCreateFn onCreate;
+  OnDatabaseConfigureFn? onConfigure;
+  late OnDatabaseVersionChangeFn onDowngrade;
+  late OnDatabaseVersionChangeFn onUpgrade;
+  late OnDatabaseOpenFn onOpen;
 
   void reset() {
     onConfigureCalled = false;
@@ -78,13 +79,13 @@ class _OpenCallbacks {
     onUpgradeCalled = false;
   }
 
-  Future<Database> open(String path, {int version}) async {
+  Future<Database> open(String path, {required int version}) async {
     reset();
     return await databaseFactory.openDatabase(path,
         options: OpenDatabaseOptions(
             version: version,
             onCreate: onCreate,
-            onConfigure: onConfigure,
+            onConfigure: onConfigure!,
             onDowngrade: onDowngrade,
             onUpgrade: onUpgrade,
             onOpen: onOpen));
@@ -199,7 +200,7 @@ void run(SqfliteTestContext context) {
     // should fail
     var path = await context.initDeleteDb('open_no_version_on_create.db');
     verify(!(File(path).existsSync()));
-    Database db;
+    Database? db;
     try {
       db = await factory.openDatabase(path,
           options: OpenDatabaseOptions(onCreate: (Database db, int version) {
@@ -257,7 +258,7 @@ void run(SqfliteTestContext context) {
               await db.execute('CREATE TABLE Test(id INTEGER PRIMARY KEY)');
             }));
     try {
-      await database.insert('Test', <String, dynamic>{'id': 1, 'name': 'test'});
+      await database.insert('Test', <String, Object?>{'id': 1, 'name': 'test'});
       fail('should fail');
     } on DatabaseException catch (e) {
       print(e);
@@ -277,7 +278,7 @@ void run(SqfliteTestContext context) {
 
     expect(
         await database
-            .insert('Test', <String, dynamic>{'id': 1, 'name': 'test'}),
+            .insert('Test', <String, Object?>{'id': 1, 'name': 'test'}),
         1);
     await database.close();
   });
@@ -416,27 +417,27 @@ void run(SqfliteTestContext context) {
     var step = 1;
     var openCallbacks = _OpenCallbacks(factory);
     var db = await openCallbacks.open(path, version: 1);
-    verify(openCallbacks.onConfigureCalled, 'onConfiguredCalled $step');
-    verify(openCallbacks.onCreateCalled, 'onCreateCalled $step');
-    verify(openCallbacks.onOpenCalled, 'onOpenCalled $step');
+    verify(openCallbacks.onConfigureCalled!, 'onConfiguredCalled $step');
+    verify(openCallbacks.onCreateCalled!, 'onCreateCalled $step');
+    verify(openCallbacks.onOpenCalled!, 'onOpenCalled $step');
     verify(!openCallbacks.onUpgradeCalled, 'onUpdateCalled $step');
     verify(!openCallbacks.onDowngradeCalled, 'onDowngradCalled $step');
     await db.close();
 
     ++step;
     db = await openCallbacks.open(path, version: 3);
-    verify(openCallbacks.onConfigureCalled, 'onConfiguredCalled $step');
-    verify(!openCallbacks.onCreateCalled, 'onCreateCalled $step');
-    verify(openCallbacks.onOpenCalled, 'onOpenCalled $step');
+    verify(openCallbacks.onConfigureCalled!, 'onConfiguredCalled $step');
+    verify(!openCallbacks.onCreateCalled!, 'onCreateCalled $step');
+    verify(openCallbacks.onOpenCalled!, 'onOpenCalled $step');
     verify(openCallbacks.onUpgradeCalled, 'onUpdateCalled $step');
     verify(!openCallbacks.onDowngradeCalled, 'onDowngradCalled $step');
     await db.close();
 
     ++step;
     db = await openCallbacks.open(path, version: 2);
-    verify(openCallbacks.onConfigureCalled, 'onConfiguredCalled $step');
-    verify(!openCallbacks.onCreateCalled, 'onCreateCalled $step');
-    verify(openCallbacks.onOpenCalled, 'onOpenCalled $step');
+    verify(openCallbacks.onConfigureCalled!, 'onConfiguredCalled $step');
+    verify(!openCallbacks.onCreateCalled!, 'onCreateCalled $step');
+    verify(openCallbacks.onOpenCalled!, 'onOpenCalled $step');
     verify(!openCallbacks.onUpgradeCalled, 'onUpdateCalled $step');
     verify(openCallbacks.onDowngradeCalled, 'onDowngradCalled $step');
     await db.close();
@@ -450,7 +451,7 @@ void run(SqfliteTestContext context) {
         openCallbacks.onConfigureCalled = false;
       }
       configureCount++;
-      callback(db);
+      callback!(db);
     };
     ++step;
     db = await openCallbacks.open(path, version: 1);
@@ -595,7 +596,7 @@ void run(SqfliteTestContext context) {
       var path = join(databasesPath, 'demo_asset_example.db');
 
       // try opening (will work if it exists)
-      Database db;
+      Database? db;
       try {
         db = await factory.openDatabase(path,
             options: OpenDatabaseOptions(readOnly: true));
@@ -616,7 +617,7 @@ void run(SqfliteTestContext context) {
     for (var i = 0; i < 100; i++) {
       unawaited(helper.getDb());
     }
-    var db = await helper.getDb();
+    var db = (await helper.getDb())!;
     await db.close();
   });
 
@@ -662,7 +663,7 @@ void run(SqfliteTestContext context) {
     try {
       await db
           .execute('CREATE TABLE IF NOT EXISTS Test(id INTEGER PRIMARY KEY)');
-      await db.insert('Test', <String, dynamic>{'id': 1});
+      await db.insert('Test', <String, Object?>{'id': 1});
       expect(await db.query('Test'), [
         {'id': 1}
       ]);
@@ -688,7 +689,7 @@ void run(SqfliteTestContext context) {
 
     var db = await factory.openDatabase(path);
     await db.execute('CREATE TABLE IF NOT EXISTS Test(id INTEGER PRIMARY KEY)');
-    await db.insert('Test', <String, dynamic>{'id': 1});
+    await db.insert('Test', <String, Object?>{'id': 1});
     expect(await db.query('Test'), [
       {'id': 1}
     ]);
@@ -718,6 +719,92 @@ void run(SqfliteTestContext context) {
       await db.close();
     }
   });
+
+  test('multiple open different database', () async {
+    // await context.devSetDebugModeOn(true);
+    var path1 = await context.initDeleteDb('multiple_open_1.db');
+    var path2 = await context.initDeleteDb('multiple_open_2.db');
+
+    var onCreateCompleter1 = Completer();
+    var onCreateCompleter2 = Completer();
+
+    Database? db1;
+    Database? db2;
+
+    try {
+      // Don't wait here
+      var futureDb1 = factory.openDatabase(path1,
+          options: OpenDatabaseOptions(
+              version: 1,
+              onCreate: (db, version) async {
+                // wait for db2
+                await onCreateCompleter2.future;
+                // mark as called
+                onCreateCompleter1.complete();
+              }));
+      db2 = await factory.openDatabase(path2,
+          options: OpenDatabaseOptions(
+              version: 1,
+              onCreate: (db, version) async {
+                // mark as called
+                onCreateCompleter2.complete();
+                // wait for db1;
+                await onCreateCompleter1.future;
+              }));
+      db1 = await futureDb1;
+      await onCreateCompleter1.future;
+      await onCreateCompleter2.future;
+    } finally {
+      await db1?.close();
+      await db2?.close();
+    }
+  });
+
+  test('multiple open same database', () async {
+    // await context.devSetDebugModeOn(true);
+    var path1 = await context.initDeleteDb('multiple_open_same.db');
+    var path2 = path1;
+
+    var onCreateCompleter1 = Completer();
+    var onCreateCompleter2 = Completer();
+
+    Database? db1;
+    Database db2;
+
+    try {
+      // Don't wait here
+      var futureDb1 = factory.openDatabase(path1,
+          options: OpenDatabaseOptions(
+              version: 1,
+              onCreate: (db, version) async {
+                // wait for db2
+                try {
+                  await onCreateCompleter2.future
+                      .timeout(const Duration(milliseconds: 1000));
+                  fail('should fail before with a timeout exception');
+                } on TimeoutException catch (_) {
+                  // expected
+                }
+                // mark as called
+                onCreateCompleter1.complete();
+              }));
+      db2 = await factory.openDatabase(path2,
+          options: OpenDatabaseOptions(
+              version: 1,
+              onCreate: (db, version) async {
+                fail('should never be called');
+              },
+              onOpen: (db) {
+                fail('should never be called');
+              }));
+      db1 = await futureDb1;
+      // same db!
+      expect(db1, db2);
+      await onCreateCompleter1.future;
+    } finally {
+      await db1?.close();
+    }
+  });
 }
 
 /// Open helper.
@@ -730,11 +817,11 @@ class Helper {
 
   /// Database path.
   final String path;
-  Database _db;
+  Database? _db;
   final _lock = Lock();
 
   /// Get the opened database.
-  Future<Database> getDb() async {
+  Future<Database?> getDb() async {
     if (_db == null) {
       await _lock.synchronized(() async {
         // Check again once entering the synchronized block

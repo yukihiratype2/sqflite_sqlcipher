@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqflite_common/sqflite_dev.dart';
@@ -24,8 +23,8 @@ abstract class SqfliteTestContext {
   /// Delete an existing db, creates its parent folder
   Future<String> initDeleteDb(String dbName);
 
-  /// Create a directory
-  Future<String> createDirectory(String path);
+  /// Create a directory (null means the databases path
+  Future<String> createDirectory(String? path);
 
   /// Delete a directory content
   Future<String> deleteDirectory(String path);
@@ -59,6 +58,7 @@ abstract class SqfliteTestContext {
   Future devSetDebugModeOn(bool on);
 }
 
+/// sqflite test context mixin.
 mixin SqfliteTestContextMixin implements SqfliteTestContext {
   /// FFI no supports Without row id on linux
   @override
@@ -94,9 +94,10 @@ mixin SqfliteTestContextMixin implements SqfliteTestContext {
       .setLogLevel(on ? sqfliteLogLevelVerbose : sqfliteLogLevelNone);
 }
 
+/// sqflite local test context mixin.
 mixin SqfliteLocalTestContextMixin implements SqfliteTestContext {
   @override
-  Future<String> createDirectory(String path) async {
+  Future<String> createDirectory(String? path) async {
     path = await fixDirectoryPath(path);
     try {
       await Directory(path).create(recursive: true);
@@ -121,7 +122,8 @@ mixin SqfliteLocalTestContextMixin implements SqfliteTestContext {
     return path;
   }
 
-  Future<String> fixDirectoryPath(String path) async {
+  /// Fix directory path relative to the databases path if possible.
+  Future<String> fixDirectoryPath(String? path) async {
     if (path == null) {
       path = await databaseFactory.getDatabasesPath();
     } else {
@@ -152,7 +154,7 @@ mixin SqfliteLocalTestContextMixin implements SqfliteTestContext {
 class SqfliteLocalTestContext
     with SqfliteTestContextMixin, SqfliteLocalTestContextMixin {
   /// Local context.
-  SqfliteLocalTestContext({@required this.databaseFactory});
+  SqfliteLocalTestContext({required this.databaseFactory});
 
   @override
   final DatabaseFactory databaseFactory;

@@ -26,8 +26,7 @@ void run(SqfliteTestContext context) {
       var hasFailed = false;
       try {
         await db.transaction((txn) async {
-          await txn.rawInsert(
-              'INSERT INTO Test (name) VALUES (?)', <dynamic>['item']);
+          await txn.rawInsert('INSERT INTO Test (name) VALUES (?)', ['item']);
           var afterCount = utils
               .firstIntValue(await txn.rawQuery('SELECT COUNT(*) FROM Test'));
           expect(afterCount, 1);
@@ -58,7 +57,7 @@ void run(SqfliteTestContext context) {
       await db.execute('CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT)');
 
       var batch = db.batch();
-      batch.rawInsert('INSERT INTO Test (name) VALUES (?)', <dynamic>['item']);
+      batch.rawInsert('INSERT INTO Test (name) VALUES (?)', ['item']);
       batch.execute('DUMMY CALL');
 
       var hasFailed = true;
@@ -103,7 +102,7 @@ void run(SqfliteTestContext context) {
       }
 
       try {
-        await db.rawQuery('malformed query with args ?', <dynamic>[1]);
+        await db.rawQuery('malformed query with args ?', [1]);
         fail('should fail'); // should fail before
       } on DatabaseException catch (e) {
         verify(e.isSyntaxError());
@@ -137,6 +136,37 @@ void run(SqfliteTestContext context) {
       }
 
       await db.close();
+    });
+
+    test('Duplicate column Exception', () async {
+      // await utils.devSetDebugModeOn(true);
+      var path = inMemoryDatabasePath;
+      var db = await factory.openDatabase(path);
+
+      try {
+        await db.execute('ALTER TABLE Test ADD COLUMN name TEXT');
+      } on DatabaseException catch (e) {
+        // devPrint(e);
+        // Ffi: SqfliteFfiException(sqlite_error1, , SqliteException(1): no such table: Test} DatabaseException(SqliteException(1): no such table: Test) sql 'ALTER TABLE Test ADD COLUMN name TEXT' {details: {database: {path: :memory:, id: 1, readOnly: false, singleInstance: true}, sql: ALTER TABLE Test ADD COLUMN name TEXT}}
+        // Android: DatabaseException(no such table: Test (code 1 SQLITE_ERROR): , while compiling: ALTER TABLE Test ADD COLUMN name TEXT) sql 'ALTER TABLE Test ADD COLUMN name TEXT' args []}
+        expect(e.getResultCode(), 1, reason: 'error $e');
+        expect(e.isNoSuchTableError('Test'), isTrue, reason: 'error $e');
+        expect(e.isNoSuchTableError(), isTrue, reason: 'error $e');
+      }
+
+      await db.execute('CREATE Table Test (id INTEGER PRIMARY KEY)');
+      await db.execute('ALTER TABLE Test ADD COLUMN name TEXT');
+
+      try {
+        await db.execute('ALTER TABLE Test ADD COLUMN name TEXT');
+      } on DatabaseException catch (e) {
+        // Integration test, not handled yet
+        // Ffi: SqfliteFfiException(sqlite_error1, , SqliteException(1): duplicate column name: name} DatabaseException(SqliteException(1): duplicate column name: name) sql 'ALTER TABLE Test ADD COLUMN name TEXT' {details: {database: {path: :memory:, id: 1, readOnly: false, singleInstance: true}, sql: ALTER TABLE Test ADD COLUMN name TEXT}}
+        // Android DatabaseException(duplicate column name: name (code 1 SQLITE_ERROR): , while compiling: ALTER TABLE Test ADD COLUMN name TEXT) sql 'ALTER TABLE Test ADD COLUMN name TEXT' args []}
+        expect(e.getResultCode(), 1, reason: 'error $e');
+        expect(e.isDuplicateColumnError('name'), isTrue, reason: 'error $e');
+        expect(e.isDuplicateColumnError(), isTrue, reason: 'error $e');
+      }
     });
 
     test('open read-only exception', () async {
@@ -192,10 +222,10 @@ void run(SqfliteTestContext context) {
               onCreate: (db, version) {
                 db.execute('CREATE TABLE Test (name TEXT UNIQUE)');
               }));
-      await db.insert('Test', <String, dynamic>{'name': 'test1'});
+      await db.insert('Test', <String, Object?>{'name': 'test1'});
 
       try {
-        await db.insert('Test', <String, dynamic>{'name': 'test1'});
+        await db.insert('Test', <String, Object?>{'name': 'test1'});
         fail('should fail');
       } on DatabaseException catch (e) {
         // iOS: Error Domain=FMDatabase Code=19 'UNIQUE constraint failed: Test.name' UserInfo={NSLocalizedDescription=UNIQUE constraint failed: Test.name}) s
@@ -218,9 +248,9 @@ void run(SqfliteTestContext context) {
                 db.execute(
                     'CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL)');
               }));
-      await db.insert('Test', <String, dynamic>{'id': 1, 'name': 'test1'});
+      await db.insert('Test', <String, Object?>{'id': 1, 'name': 'test1'});
       try {
-        await db.insert('Test', <String, dynamic>{'id': 1});
+        await db.insert('Test', <String, Object?>{'id': 1});
         fail('should fail');
       } on DatabaseException catch (e) {
         print(e);
@@ -242,10 +272,10 @@ void run(SqfliteTestContext context) {
               onCreate: (db, version) {
                 db.execute('CREATE TABLE Test (name TEXT PRIMARY KEY)');
               }));
-      await db.insert('Test', <String, dynamic>{'name': 'test1'});
+      await db.insert('Test', <String, Object?>{'name': 'test1'});
 
       try {
-        await db.insert('Test', <String, dynamic>{'name': 'test1'});
+        await db.insert('Test', <String, Object?>{'name': 'test1'});
         fail('should fail');
       } on DatabaseException catch (e) {
         // iOS: DatabaseException(Error Domain=FMDatabase Code=1555 "UNIQUE constraint failed: Test.name"
@@ -258,7 +288,7 @@ void run(SqfliteTestContext context) {
 
       // try in batch
       var batch = db.batch();
-      batch.insert('Test', <String, dynamic>{'name': 'test1'});
+      batch.insert('Test', <String, Object?>{'name': 'test1'});
       try {
         await batch.commit();
         fail('should fail');
@@ -272,9 +302,9 @@ void run(SqfliteTestContext context) {
       }
 
       // update
-      await db.insert('Test', <String, dynamic>{'name': 'test2'});
+      await db.insert('Test', <String, Object?>{'name': 'test2'});
       try {
-        await db.update('Test', <String, dynamic>{'name': 'test1'},
+        await db.update('Test', <String, Object?>{'name': 'test1'},
             where: 'name = "test2"');
         fail('should fail');
       } on DatabaseException catch (e) {
@@ -322,7 +352,7 @@ void run(SqfliteTestContext context) {
 
       try {
         var batch = db.batch();
-        batch.rawQuery('malformed query with args ?', <dynamic>[1]);
+        batch.rawQuery('malformed query with args ?', [1]);
         await batch.commit();
         fail('should fail'); // should fail before
       } on DatabaseException catch (e) {
@@ -480,7 +510,48 @@ void run(SqfliteTestContext context) {
       await db.close();
     });
 
-    test('Bind no argument (no iOS)', () async {
+    /// Check that non alpha table and column name are properly escaped
+    test('escape when needed', () async {
+      // await factory.setLogLevel(sqfliteLogLevelVerbose);
+      var db = await factory.openDatabase(inMemoryDatabasePath);
+
+      var safeTableName = 'my_table';
+      var safeColumnName = 'my_column';
+      for (var name in [
+        'semicolumn:',
+        '1',
+        'table',
+        r'$',
+        '[](){}:;?/\\&éçà^ù*-+,!̣'
+      ]) {
+        try {
+          await db.execute('CREATE TABLE $name ($safeColumnName INTEGER)');
+          fail('should fail');
+        } on DatabaseException catch (_) {
+          // unrecognized token: ":"
+        }
+        try {
+          await db.execute('CREATE TABLE $safeTableName ($name INTEGER)');
+          fail('should fail');
+        } on DatabaseException catch (_) {
+          // unrecognized token: ":"
+        }
+
+        await db.execute('CREATE TABLE "$name" ("$name" INTEGER)');
+        await db.insert('"$name"', {'"$name"': 1});
+        expect(await db.query('"$name"'), [
+          {name: 1}
+        ]);
+        expect(await db.update('"$name"', {'"$name"': 2}), 1);
+        expect(await db.query('"$name"'), [
+          {name: 2}
+        ]);
+      }
+
+      await db.close();
+    });
+
+    test('Bind no argument (no iOS/ffi)', () async {
       if (!Platform.isIOS) {
         // await utils.devSetDebugModeOn(true);
         var path = await context.initDeleteDb('bind_no_arg_failed.db');
@@ -488,16 +559,15 @@ void run(SqfliteTestContext context) {
 
         await db.execute('CREATE TABLE Test (name TEXT)');
 
-        await db
-            .rawInsert('INSERT INTO Test (name) VALUES (\'?\')', <dynamic>[]);
+        await db.rawInsert('INSERT INTO Test (name) VALUES (\'?\')', []);
 
-        await db.rawQuery('SELECT * FROM Test WHERE name = ?', <dynamic>[]);
+        await db.rawQuery('SELECT * FROM Test WHERE name = ?', []);
 
-        await db.rawDelete('DELETE FROM Test WHERE name = ?', <dynamic>[]);
+        await db.rawDelete('DELETE FROM Test WHERE name = ?', []);
 
         await db.close();
       }
-    });
+    }, skip: true);
 
     test('crash ios (no iOS)', () async {
       // This crashes natively on iOS...can't catch it yet
@@ -509,14 +579,13 @@ void run(SqfliteTestContext context) {
 
         await db.execute('CREATE TABLE Test (name TEXT)');
 
-        await db
-            .rawInsert('INSERT INTO Test (name) VALUES (\'?\')', <dynamic>[]);
+        await db.rawInsert('INSERT INTO Test (name) VALUES (\'?\')', []);
 
-        await db.rawQuery('SELECT * FROM Test WHERE name = ?', <dynamic>[]);
+        await db.rawQuery('SELECT * FROM Test WHERE name = ?', []);
 
         await db.close();
       }
-    });
+    }, skip: true);
 
     test('Bind null argument', () async {
       // await utils.devSetDebugModeOn(true);
@@ -526,6 +595,8 @@ void run(SqfliteTestContext context) {
       await db.execute('CREATE TABLE Test (name TEXT)');
 
       //await db.rawInsert('INSERT INTO Test (name) VALUES (\'?\')', [null]);
+      // nnbd, this is no longer possible!
+      /*
       try {
         await db
             .rawInsert('INSERT INTO Test (name) VALUES (?)', <dynamic>[null]);
@@ -547,7 +618,7 @@ void run(SqfliteTestContext context) {
         print('ERR: $e');
         expect(e.toString().contains("sql 'DELETE FROM Test"), true);
       }
-
+       */
       await db.close();
     });
 
@@ -560,23 +631,23 @@ void run(SqfliteTestContext context) {
 
       try {
         await db.rawInsert(
-            'INSERT INTO Test (name) VALUES (\'value\')', <dynamic>['value2']);
+            'INSERT INTO Test (name) VALUES (\'value\')', ['value2']);
       } on DatabaseException catch (e) {
         print('ERR: $e');
         expect(e.toString().contains('INSERT INTO Test'), true);
       }
 
       try {
-        await db.rawQuery(
-            'SELECT * FROM Test WHERE name = \'value\'', <dynamic>['value2']);
+        await db
+            .rawQuery('SELECT * FROM Test WHERE name = \'value\'', ['value2']);
       } on DatabaseException catch (e) {
         print('ERR: $e');
         expect(e.toString().contains('SELECT * FROM Test'), true);
       }
 
       try {
-        await db.rawDelete(
-            'DELETE FROM Test WHERE name = \'value\'', <dynamic>['value2']);
+        await db
+            .rawDelete('DELETE FROM Test WHERE name = \'value\'', ['value2']);
       } on DatabaseException catch (e) {
         print('ERR: $e');
         expect(e.toString().contains('DELETE FROM Test'), true);
@@ -668,8 +739,8 @@ void run(SqfliteTestContext context) {
         var db = await factory.openDatabase(inMemoryDatabasePath);
         await db.close();
       } finally {
-        await db1?.close();
-        await db2?.close();
+        await db1.close();
+        await db2.close();
       }
     }, skip: !supportsDeadLock);
 
@@ -698,8 +769,8 @@ void run(SqfliteTestContext context) {
         var db = await factory.openDatabase(inMemoryDatabasePath);
         await db.close();
       } finally {
-        await db1?.close();
-        await db2?.close();
+        await db1.close();
+        await db2.close();
       }
     }, skip: !supportsDeadLock);
   });

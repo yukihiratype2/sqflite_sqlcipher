@@ -1,20 +1,50 @@
+// Copyright 2019, the Chromium project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:integration_test/integration_test.dart';
 import 'package:path/path.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_example/utils.dart';
-import 'package:test/test.dart';
+import 'package:sqflite_example/src/common_import.dart';
 
 void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
   group('sqflite', () {
-    test('open null', () async {
-      var exception;
-      try {
-        await openDatabase(null);
-      } catch (e) {
-        exception = e;
-      }
-      expect(exception, isNotNull);
+    group('open', () {
+      test('missing directory', () async {
+        //await devVerbose();
+        var path = join('test_missing_sub_dir', 'simple.db');
+        try {
+          await Directory(join((await getDatabasesPath())!, dirname(path)))
+              .delete(recursive: true);
+        } catch (_) {}
+        var db =
+            await openDatabase(path, version: 1, onCreate: (db, version) async {
+          expect(await db.getVersion(), 0);
+        });
+        expect(await db.getVersion(), 1);
+        await db.close();
+      });
+      test('failure', () {
+        // This one seems ignored
+        // fail('regular test failure');
+      });
+      test('in_memory', () async {
+        var db = await openDatabase(inMemoryDatabasePath, version: 1,
+            onCreate: (db, version) async {
+          expect(await db.getVersion(), 0);
+        });
+        expect(await db.getVersion(), 1);
+        await db.close();
+      });
     });
+
     test('exists', () async {
       expect(await databaseExists(inMemoryDatabasePath), isFalse);
       var path = 'test_exists.db';
@@ -24,7 +54,7 @@ void main() {
       try {
         expect(await databaseExists(path), isTrue);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
     test('close in transaction', () async {
@@ -49,14 +79,12 @@ void main() {
     ///
     /// An empty file is a valid empty sqlite file
     Future<bool> isDatabase(String path) async {
-      Database db;
       var isDatabase = false;
+      Database? db;
       try {
         db = await openReadOnlyDatabase(path);
-        var version = await db.getVersion();
-        if (version != null) {
-          isDatabase = true;
-        }
+        await db.getVersion();
+        isDatabase = true;
       } catch (_) {} finally {
         await db?.close();
       }
@@ -68,7 +96,7 @@ void main() {
       await deleteDatabase(path);
       try {
         var db = await openReadOnlyDatabase(path);
-        fail('should fail ${db?.path}');
+        fail('should fail ${db.path}');
       } on DatabaseException catch (_) {}
 
       expect(await isDatabase(path), isFalse);
@@ -77,7 +105,7 @@ void main() {
     test('read_only empty file', () async {
       var path = 'empty_file_database.db';
       await deleteDatabase(path);
-      var fullPath = join(await getDatabasesPath(), path);
+      var fullPath = join((await getDatabasesPath())!, path);
       await Directory(dirname(fullPath)).create(recursive: true);
       await File(fullPath).writeAsString('');
 
@@ -95,7 +123,7 @@ void main() {
     test('read_only missing bad format', () async {
       var path = 'test_bad_format_database.db';
       await deleteDatabase(path);
-      var fullPath = join(await getDatabasesPath(), path);
+      var fullPath = join((await getDatabasesPath())!, path);
       await Directory(dirname(fullPath)).create(recursive: true);
       await File(fullPath).writeAsString('test');
 
@@ -105,7 +133,7 @@ void main() {
       try {
         var version = await db.getVersion();
         print(await db.query('sqlite_master'));
-        fail('getVersion should fail ${db?.path} $version');
+        fail('getVersion should fail ${db.path} $version');
       } on DatabaseException catch (_) {
         // Android: DatabaseException(file is not a database (code 26 SQLITE_NOTADB)) sql 'PRAGMA user_version' args []}
       }
@@ -121,7 +149,7 @@ void main() {
     test('multiple database', () async {
       //await Sqflite.devSetDebugModeOn(true);
       var count = 10;
-      var dbs = List<Database>(count);
+      var dbs = List<Database?>.filled(count, null, growable: false);
       for (var i = 0; i < count; i++) {
         var path = 'test_multiple_$i.db';
         await deleteDatabase(path);
@@ -137,12 +165,12 @@ void main() {
       }
 
       for (var i = 0; i < count; i++) {
-        var db = dbs[i];
+        var db = dbs[i]!;
         try {
           var name = (await db.query('Test', columns: ['name']))
               .first
               .values
-              .first as String;
+              .first as String?;
           expect(name, 'test_$i');
         } finally {
           await db.close();
@@ -150,7 +178,7 @@ void main() {
       }
 
       for (var i = 0; i < count; i++) {
-        var db = dbs[i];
+        var db = dbs[i]!;
         await db.close();
       }
     });
@@ -210,7 +238,7 @@ void main() {
 
     test('deleteDatabase', () async {
       // await devVerbose();
-      Database db;
+      late Database db;
       try {
         var path = 'test_delete_database.db';
         await deleteDatabase(path);
@@ -234,7 +262,7 @@ void main() {
         db = await openDatabase(path);
         expect(await db.getVersion(), 0);
       } finally {
-        await db?.close();
+        await db.close();
       }
     });
   });

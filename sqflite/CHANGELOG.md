@@ -1,4 +1,20 @@
-## 1.3.0+1
+## 2.0.0+2
+
+* `nnbd` support
+
+## 1.3.2+3
+
+* iOS/macOS: Update FMDB to 2.7.5+
+* android: Update gradle to 6.5
+* fix logs on iOS
+
+## 1.3.1+2
+
+* add `databaseFactory` setter to change the default sqflite factory.
+* Fix empty Blob returned as null on MacOS/iOS
+* Test using `integration_test`
+
+## 1.3.0+2
 
 * Add sqflite_common dependency
 

@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'src_mixin_test.dart' show MockDatabaseFactoryEmpty, MockInvalidFactory;
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -9,7 +11,7 @@ void main() {
     const channel = MethodChannel('com.tekartik.sqflite');
 
     final log = <MethodCall>[];
-    String response;
+    String? response;
 
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
@@ -49,7 +51,8 @@ void main() {
         Sqflite.devSetOptions,
         sqfliteLogLevelNone,
         sqfliteLogLevelSql,
-        sqfliteLogLevelVerbose
+        sqfliteLogLevelVerbose,
+        databaseFactory,
       ].forEach((dynamic value) {
         expect(value, isNotNull);
       });
@@ -57,25 +60,25 @@ void main() {
 
     test('firstIntValue', () {
       expect(
-          Sqflite.firstIntValue(<Map<String, dynamic>>[
-            <String, dynamic>{'test': 1}
+          Sqflite.firstIntValue(<Map<String, Object?>>[
+            <String, Object?>{'test': 1}
           ]),
           1);
       expect(
-          Sqflite.firstIntValue(<Map<String, dynamic>>[
-            <String, dynamic>{'test': 1},
-            <String, dynamic>{'test': 1}
+          Sqflite.firstIntValue(<Map<String, Object?>>[
+            <String, Object?>{'test': 1},
+            <String, Object?>{'test': 1}
           ]),
           1);
       expect(
-          Sqflite.firstIntValue(<Map<String, dynamic>>[
-            <String, dynamic>{'test': null}
+          Sqflite.firstIntValue(<Map<String, Object?>>[
+            <String, Object?>{'test': null}
           ]),
           null);
-      expect(Sqflite.firstIntValue(<Map<String, dynamic>>[<String, dynamic>{}]),
+      expect(Sqflite.firstIntValue(<Map<String, Object?>>[<String, Object?>{}]),
           isNull);
-      expect(Sqflite.firstIntValue(<Map<String, dynamic>>[]), isNull);
-      expect(Sqflite.firstIntValue(<Map<String, dynamic>>[<String, dynamic>{}]),
+      expect(Sqflite.firstIntValue(<Map<String, Object?>>[]), isNull);
+      expect(Sqflite.firstIntValue(<Map<String, Object?>>[<String, Object?>{}]),
           isNull);
     });
 
@@ -117,14 +120,36 @@ void main() {
       } on FormatException catch (_) {}
     });
 
+    /*
     test('open null', () async {
-      AssertionError exception;
+      AssertionError? exception;
       try {
-        await openDatabase(null);
+        await openDatabase(null!);
       } on AssertionError catch (e) {
         exception = e;
       }
       expect(exception, isNotNull);
+    });
+     */
+
+    test('databaseFactory', () {
+      final originalDefaultFactory = databaseFactory;
+      try {
+        databaseFactory = null;
+        final factory = MockDatabaseFactoryEmpty();
+        databaseFactory = factory;
+        expect(databaseFactory, factory);
+        expect(databaseFactory, isNot(originalDefaultFactory));
+        databaseFactory = originalDefaultFactory; // stderr trigger here
+
+        try {
+          databaseFactory = MockInvalidFactory();
+          fail('should fail');
+        } on ArgumentError catch (_) {}
+      } finally {
+        databaseFactory = null;
+        databaseFactory = originalDefaultFactory;
+      }
     });
   });
 }

@@ -14,11 +14,26 @@ export 'package:sqflite_common/src/exception.dart' show DatabaseException;
 
 /// Basic databases operations
 abstract class DatabaseFactory {
-  /// Open a database at [path] with the given [options]
-  Future<Database> openDatabase(String path, {OpenDatabaseOptions options});
+  /// Open a database at [path] with the given [OpenDatabaseOptions]`options`
+  ///
+  /// ```
+  ///   var databasesPath = await getDatabasesPath();
+  ///   String path = join(databasesPath, 'demo.db');
+  ///   Database database = await openDatabase(path, version: 1,
+  ///       onCreate: (Database db, int version) async {
+  ///     // When creating the db, create the table
+  ///     await db.execute(
+  ///         'CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT, value INTEGER, num REAL)');
+  ///   });
+  ///```
+  /// Notice, `join` is a part of the [path](https://pub.dev/packages/path) package
+  Future<Database> openDatabase(String path, {OpenDatabaseOptions? options});
 
   /// Get the default databases location path
   Future<String> getDatabasesPath();
+
+  /// Set the default databases location path
+  Future<void> setDatabasesPath(String path);
 
   /// Delete a database if it exists
   Future<void> deleteDatabase(String path);
@@ -31,66 +46,113 @@ abstract class DatabaseFactory {
 /// Common API for [Database] and [Transaction] to execute SQL commands
 ///
 abstract class DatabaseExecutor {
-  /// Execute an SQL query with no return value
-  Future<void> execute(String sql, [List<dynamic> arguments]);
-
-  /// Execute a raw SQL INSERT query
+  /// Execute an SQL query with no return value.
   ///
-  /// Returns the last inserted record id
-  Future<int> rawInsert(String sql, [List<dynamic> arguments]);
+  /// ```
+  ///   await db.execute(
+  ///   'CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT, value INTEGER, num REAL)');
+  /// ```
+  Future<void> execute(String sql, [List<Object?>? arguments]);
 
-  /// INSERT helper
-  Future<int> insert(String table, Map<String, dynamic> values,
-      {String nullColumnHack, ConflictAlgorithm conflictAlgorithm});
-
-  /// Helper to query a table
+  /// Executes a raw SQL INSERT query and returns the last inserted row ID.
   ///
-  /// @param distinct true if you want each row to be unique, false otherwise.
-  /// @param table The table names to compile the query against.
-  /// @param columns A list of which columns to return. Passing null will
-  ///            return all columns, which is discouraged to prevent reading
-  ///            data from storage that isn't going to be used.
-  /// @param where A filter declaring which rows to return, formatted as an SQL
-  ///            WHERE clause (excluding the WHERE itself). Passing null will
-  ///            return all rows for the given URL.
-  /// @param groupBy A filter declaring how to group rows, formatted as an SQL
-  ///            GROUP BY clause (excluding the GROUP BY itself). Passing null
-  ///            will cause the rows to not be grouped.
-  /// @param having A filter declare which row groups to include in the cursor,
-  ///            if row grouping is being used, formatted as an SQL HAVING
-  ///            clause (excluding the HAVING itself). Passing null will cause
-  ///            all row groups to be included, and is required when row
-  ///            grouping is not being used.
-  /// @param orderBy How to order the rows, formatted as an SQL ORDER BY clause
-  ///            (excluding the ORDER BY itself). Passing null will use the
-  ///            default sort order, which may be unordered.
-  /// @param limit Limits the number of rows returned by the query,
-  /// @param offset starting index,
-
-  /// @return the items found
-  Future<List<Map<String, dynamic>>> query(String table,
-      {bool distinct,
-      List<String> columns,
-      String where,
-      List<dynamic> whereArgs,
-      String groupBy,
-      String having,
-      String orderBy,
-      int limit,
-      int offset});
-
-  /// Execute a raw SQL SELECT query
+  /// ```
+  /// int id1 = await database.rawInsert(
+  ///   'INSERT INTO Test(name, value, num) VALUES("some name", 1234, 456.789)');
+  /// ```
   ///
-  /// Returns a list of rows that were found
-  Future<List<Map<String, dynamic>>> rawQuery(String sql,
-      [List<dynamic> arguments]);
+  /// 0 could be returned for some specific conflict algorithms if not inserted.
+  Future<int> rawInsert(String sql, [List<Object?>? arguments]);
 
-  /// Execute a raw SQL UPDATE query
+  /// This method helps insert a map of [values]
+  /// into the specified [table] and returns the
+  /// id of the last inserted row.
   ///
-  /// Returns the number of changes made
-  Future<int> rawUpdate(String sql, [List<dynamic> arguments]);
+  /// ```
+  ///    var value = {
+  ///      'age': 18,
+  ///      'name': 'value'
+  ///    };
+  ///    int id = await db.insert(
+  ///      'table',
+  ///      value,
+  ///      conflictAlgorithm: ConflictAlgorithm.replace,
+  ///    );
+  /// ```
+  ///
+  /// 0 could be returned for some specific conflict algorithms if not inserted.
+  Future<int> insert(String table, Map<String, Object?> values,
+      {String? nullColumnHack, ConflictAlgorithm? conflictAlgorithm});
 
-  /// Convenience method for updating rows in the database.
+  /// This is a helper to query a table and return the items found. All optional
+  /// clauses and filters are formatted as SQL queries
+  /// excluding the clauses' names.
+  ///
+  /// [table] contains the table names to compile the query against.
+  ///
+  /// [distinct] when set to true ensures each row is unique.
+  ///
+  /// The [columns] list specify which columns to return. Passing null will
+  /// return all columns, which is discouraged.
+  ///
+  /// [where] filters which rows to return. Passing null will return all rows
+  /// for the given URL. '?'s are replaced with the items in the
+  /// [whereArgs] field.
+  ///
+  /// [groupBy] declares how to group rows. Passing null
+  /// will cause the rows to not be grouped.
+  ///
+  /// [having] declares which row groups to include in the cursor,
+  /// if row grouping is being used. Passing null will cause
+  /// all row groups to be included, and is required when row
+  /// grouping is not being used.
+  ///
+  /// [orderBy] declares how to order the rows,
+  /// Passing null will use the default sort order,
+  /// which may be unordered.
+  ///
+  /// [limit] limits the number of rows returned by the query.
+  ///
+  /// [offset] specifies the starting index.
+  ///
+  /// ```
+  ///  List<Map> maps = await db.query(tableTodo,
+  ///      columns: ['columnId', 'columnDone', 'columnTitle'],
+  ///      where: 'columnId = ?',
+  ///      whereArgs: [id]);
+  /// ```
+  Future<List<Map<String, Object?>>> query(String table,
+      {bool? distinct,
+      List<String>? columns,
+      String? where,
+      List<Object?>? whereArgs,
+      String? groupBy,
+      String? having,
+      String? orderBy,
+      int? limit,
+      int? offset});
+
+  /// Executes a raw SQL SELECT query and returns a list
+  /// of the rows that were found.
+  ///
+  /// ```
+  /// List<Map> list = await database.rawQuery('SELECT * FROM Test');
+  /// ```
+  Future<List<Map<String, Object?>>> rawQuery(String sql,
+      [List<Object?>? arguments]);
+
+  /// Executes a raw SQL UPDATE query and returns
+  /// the number of changes made.
+  ///
+  /// ```
+  /// int count = await database.rawUpdate(
+  ///   'UPDATE Test SET name = ?, value = ? WHERE name = ?',
+  ///   ['updated name', '9876', 'some name']);
+  /// ```
+  Future<int> rawUpdate(String sql, [List<Object?>? arguments]);
+
+  /// Convenience method for updating rows in the database. Returns
+  /// the number of changes made
   ///
   /// Update [table] with [values], a map from column names to new column
   /// values. null is a valid value that will be translated to NULL.
@@ -102,31 +164,41 @@ abstract class DatabaseExecutor {
   /// values from [whereArgs]
   ///
   /// [conflictAlgorithm] (optional) specifies algorithm to use in case of a
-  /// conflict. See [ConflictResolver] docs for more details
-  Future<int> update(String table, Map<String, dynamic> values,
-      {String where,
-      List<dynamic> whereArgs,
-      ConflictAlgorithm conflictAlgorithm});
-
-  /// Executes a raw SQL DELETE query
+  /// conflict. See [ConflictAlgorithm] docs for more details
   ///
-  /// Returns the number of changes made
-  Future<int> rawDelete(String sql, [List<dynamic> arguments]);
+  /// ```
+  /// int count = await db.update(tableTodo, todo.toMap(),
+  ///    where: '$columnId = ?', whereArgs: [todo.id]);
+  /// ```
+  Future<int> update(String table, Map<String, Object?> values,
+      {String? where,
+      List<Object?>? whereArgs,
+      ConflictAlgorithm? conflictAlgorithm});
+
+  /// Executes a raw SQL DELETE query and returns the
+  /// number of changes made.
+  ///
+  /// ```
+  /// int count = await database
+  ///   .rawDelete('DELETE FROM Test WHERE name = ?', ['another name']);
+  /// ```
+  Future<int> rawDelete(String sql, [List<Object?>? arguments]);
 
   /// Convenience method for deleting rows in the database.
   ///
   /// Delete from [table]
   ///
   /// [where] is the optional WHERE clause to apply when updating. Passing null
-  /// will update all rows.
+  /// will delete all rows.
   ///
   /// You may include ?s in the where clause, which will be replaced by the
   /// values from [whereArgs]
   ///
-  /// Returns the number of rows affected if a whereClause is passed in, 0
-  /// otherwise. To remove all rows and get a count pass '1' as the
-  /// whereClause.
-  Future<int> delete(String table, {String where, List<dynamic> whereArgs});
+  /// Returns the number of rows affected.
+  /// ```
+  ///  int count = await db.delete(tableTodo, where: 'columnId = ?', whereArgs: [id]);
+  /// ```
+  Future<int> delete(String table, {String? where, List<Object?>? whereArgs});
 
   /// Creates a batch, used for performing multiple operation
   /// in a single atomic operation.
@@ -153,9 +225,19 @@ abstract class Database implements DatabaseExecutor {
   Future<void> close();
 
   /// Calls in action must only be done using the transaction object
-  /// using the database will trigger a dead-lock
+  /// using the database will trigger a dead-lock.
+  ///
+  /// ```
+  /// await database.transaction((txn) async {
+  ///   // Ok
+  ///   await txn.execute('CREATE TABLE Test1 (id INTEGER PRIMARY KEY)');
+  ///
+  ///   // DON'T  use the database object in a transaction
+  ///   // this will deadlock!
+  ///   await database.execute('CREATE TABLE Test2 (id INTEGER PRIMARY KEY)');
+  /// });
   Future<T> transaction<T>(Future<T> Function(Transaction txn) action,
-      {bool exclusive});
+      {bool? exclusive});
 
   ///
   /// Get the database inner version
@@ -178,7 +260,7 @@ abstract class Database implements DatabaseExecutor {
   /// testing only
   @deprecated
   Future<T> devInvokeSqlMethod<T>(String method, String sql,
-      [List<dynamic> arguments]);
+      [List<Object?>? arguments]);
 }
 
 /// Prototype of the function called when the version has changed.
@@ -280,12 +362,12 @@ abstract class OpenDatabaseOptions {
   /// parameters such as callbacks for that invocation.
   ///
   factory OpenDatabaseOptions(
-      {int version,
-      OnDatabaseConfigureFn onConfigure,
-      OnDatabaseCreateFn onCreate,
-      OnDatabaseVersionChangeFn onUpgrade,
-      OnDatabaseVersionChangeFn onDowngrade,
-      OnDatabaseOpenFn onOpen,
+      {int? version,
+      OnDatabaseConfigureFn? onConfigure,
+      OnDatabaseCreateFn? onCreate,
+      OnDatabaseVersionChangeFn? onUpgrade,
+      OnDatabaseVersionChangeFn? onDowngrade,
+      OnDatabaseOpenFn? onOpen,
       bool readOnly = false,
       bool singleInstance = true}) {
     return impl.SqfliteOpenDatabaseOptions(
@@ -300,30 +382,30 @@ abstract class OpenDatabaseOptions {
   }
 
   /// Specify the expected version.
-  int version;
+  int? version;
 
   /// called right after opening the database.
-  OnDatabaseConfigureFn onConfigure;
+  OnDatabaseConfigureFn? onConfigure;
 
   /// Called when the database is created.
-  OnDatabaseCreateFn onCreate;
+  OnDatabaseCreateFn? onCreate;
 
   /// Called when the database is upgraded.
-  OnDatabaseVersionChangeFn onUpgrade;
+  OnDatabaseVersionChangeFn? onUpgrade;
 
   /// Called when the database is downgraded.
   ///
   /// Use [onDatabaseDowngradeDelete] for re-creating the database
-  OnDatabaseVersionChangeFn onDowngrade;
+  OnDatabaseVersionChangeFn? onDowngrade;
 
   /// Called after all other callbacks have been called.
-  OnDatabaseOpenFn onOpen;
+  OnDatabaseOpenFn? onOpen;
 
   /// Open the database in read-only mode (no callback called).
-  bool readOnly;
+  late bool readOnly;
 
   /// The existing single-instance (hot-restart)
-  bool singleInstance;
+  late bool singleInstance;
 }
 
 ///
@@ -332,6 +414,14 @@ abstract class OpenDatabaseOptions {
 /// methods for adding operation. None of the operation will be
 /// executed (or visible locally) until commit() is called.
 ///
+///
+/// ```
+/// batch = db.batch();
+/// batch.insert('Test', {'name': 'item'});
+/// batch.update('Test', {'name': 'new_item'}, where: 'name = ?', whereArgs: ['item']);
+/// batch.delete('Test', where: 'name = ?', whereArgs: ['item']);
+/// results = await batch.commit();
+/// ```
 abstract class Batch {
   /// Commits all of the operations in this batch as a single atomic unit
   /// The result is a list of the result of each operation in the same order
@@ -347,46 +437,46 @@ abstract class Batch {
   /// (we are already in a transaction) or if the batch was created in a
   /// transaction it will only be commited when
   /// the transaction is commited ([exclusive] is not used then)
-  Future<List<dynamic>> commit(
-      {bool exclusive, bool noResult, bool continueOnError});
+  Future<List<Object?>> commit(
+      {bool? exclusive, bool? noResult, bool? continueOnError});
 
   /// See [Database.rawInsert]
-  void rawInsert(String sql, [List<dynamic> arguments]);
+  void rawInsert(String sql, [List<Object?>? arguments]);
 
   /// See [Database.insert]
-  void insert(String table, Map<String, dynamic> values,
-      {String nullColumnHack, ConflictAlgorithm conflictAlgorithm});
+  void insert(String table, Map<String, Object?> values,
+      {String? nullColumnHack, ConflictAlgorithm? conflictAlgorithm});
 
   /// See [Database.rawUpdate]
-  void rawUpdate(String sql, [List<dynamic> arguments]);
+  void rawUpdate(String sql, [List<Object?>? arguments]);
 
   /// See [Database.update]
-  void update(String table, Map<String, dynamic> values,
-      {String where,
-      List<dynamic> whereArgs,
-      ConflictAlgorithm conflictAlgorithm});
+  void update(String table, Map<String, Object?> values,
+      {String? where,
+      List<Object?>? whereArgs,
+      ConflictAlgorithm? conflictAlgorithm});
 
   /// See [Database.rawDelete]
-  void rawDelete(String sql, [List<dynamic> arguments]);
+  void rawDelete(String sql, [List<Object?>? arguments]);
 
   /// See [Database.delete]
-  void delete(String table, {String where, List<dynamic> whereArgs});
+  void delete(String table, {String? where, List<Object?>? whereArgs});
 
   /// See [Database.execute];
-  void execute(String sql, [List<dynamic> arguments]);
+  void execute(String sql, [List<Object?>? arguments]);
 
   /// See [Database.query];
   void query(String table,
-      {bool distinct,
-      List<String> columns,
-      String where,
-      List<dynamic> whereArgs,
-      String groupBy,
-      String having,
-      String orderBy,
-      int limit,
-      int offset});
+      {bool? distinct,
+      List<String>? columns,
+      String? where,
+      List<Object?>? whereArgs,
+      String? groupBy,
+      String? having,
+      String? orderBy,
+      int? limit,
+      int? offset});
 
   /// See [Database.query];
-  void rawQuery(String sql, [List<dynamic> arguments]);
+  void rawQuery(String sql, [List<Object?>? arguments]);
 }

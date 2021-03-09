@@ -20,7 +20,7 @@ class SqfliteDatabaseBase
     with SqfliteDatabaseMixin, SqfliteDatabaseExecutorMixin {
   /// ctor
   SqfliteDatabaseBase(SqfliteDatabaseOpenHelper openHelper, String path,
-      {OpenDatabaseOptions options}) {
+      {OpenDatabaseOptions? options}) {
     this.openHelper = openHelper;
     this.path = path;
   }
@@ -29,14 +29,14 @@ class SqfliteDatabaseBase
 /// Common database/transaction implementation
 mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   @override
-  SqfliteTransaction get txn;
+  SqfliteTransaction? get txn;
 
   @override
   SqfliteDatabase get db;
 
   /// Execute an SQL query with no return value
   @override
-  Future<void> execute(String sql, [List<dynamic> arguments]) {
+  Future<void> execute(String sql, [List<Object?>? arguments]) {
     db.checkNotClosed();
     return db.txnExecute<dynamic>(txn, sql, arguments);
   }
@@ -45,7 +45,7 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   ///
   /// Returns the last inserted record id
   @override
-  Future<int> rawInsert(String sql, [List<dynamic> arguments]) {
+  Future<int> rawInsert(String sql, [List<Object?>? arguments]) {
     db.checkNotClosed();
     return db.txnRawInsert(txn, sql, arguments);
   }
@@ -53,8 +53,8 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   /// Insert a row into a table, where the keys of [values] correspond to
   /// column names
   @override
-  Future<int> insert(String table, Map<String, dynamic> values,
-      {String nullColumnHack, ConflictAlgorithm conflictAlgorithm}) {
+  Future<int> insert(String table, Map<String, Object?> values,
+      {String? nullColumnHack, ConflictAlgorithm? conflictAlgorithm}) {
     final builder = SqlBuilder.insert(table, values,
         nullColumnHack: nullColumnHack, conflictAlgorithm: conflictAlgorithm);
     return rawInsert(builder.sql, builder.arguments);
@@ -87,16 +87,16 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   /// @return the items found
   ///
   @override
-  Future<List<Map<String, dynamic>>> query(String table,
-      {bool distinct,
-      List<String> columns,
-      String where,
-      List<dynamic> whereArgs,
-      String groupBy,
-      String having,
-      String orderBy,
-      int limit,
-      int offset}) {
+  Future<List<Map<String, Object?>>> query(String table,
+      {bool? distinct,
+      List<String>? columns,
+      String? where,
+      List<Object?>? whereArgs,
+      String? groupBy,
+      String? having,
+      String? orderBy,
+      int? limit,
+      int? offset}) {
     final builder = SqlBuilder.query(table,
         distinct: distinct,
         columns: columns,
@@ -114,14 +114,14 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   ///
   /// Returns a list of rows that were found
   @override
-  Future<List<Map<String, dynamic>>> rawQuery(String sql,
-      [List<dynamic> arguments]) {
+  Future<List<Map<String, Object?>>> rawQuery(String sql,
+      [List<Object?>? arguments]) {
     checkRawArgs(arguments);
     return _rawQuery(sql, arguments);
   }
 
-  Future<List<Map<String, dynamic>>> _rawQuery(String sql,
-      [List<dynamic> arguments]) {
+  Future<List<Map<String, Object?>>> _rawQuery(String sql,
+      [List<Object?>? arguments]) {
     db.checkNotClosed();
     return db.txnRawQuery(txn, sql, arguments);
   }
@@ -130,7 +130,7 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   ///
   /// Returns the number of changes made
   @override
-  Future<int> rawUpdate(String sql, [List<dynamic> arguments]) {
+  Future<int> rawUpdate(String sql, [List<Object?>? arguments]) {
     checkRawArgs(arguments);
     return _rawUpdate(sql, arguments);
   }
@@ -138,7 +138,7 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   /// Execute a raw SQL UPDATE query
   ///
   /// Returns the number of changes made
-  Future<int> _rawUpdate(String sql, [List<dynamic> arguments]) {
+  Future<int> _rawUpdate(String sql, [List<Object?>? arguments]) {
     db.checkNotClosed();
     return db.txnRawUpdate(txn, sql, arguments);
   }
@@ -157,10 +157,10 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   /// [conflictAlgorithm] (optional) specifies algorithm to use in case of a
   /// conflict. See [ConflictResolver] docs for more details
   @override
-  Future<int> update(String table, Map<String, dynamic> values,
-      {String where,
-      List<dynamic> whereArgs,
-      ConflictAlgorithm conflictAlgorithm}) {
+  Future<int> update(String table, Map<String, Object?> values,
+      {String? where,
+      List<Object?>? whereArgs,
+      ConflictAlgorithm? conflictAlgorithm}) {
     final builder = SqlBuilder.update(table, values,
         where: where,
         whereArgs: whereArgs,
@@ -172,12 +172,12 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   ///
   /// Returns the number of changes made
   @override
-  Future<int> rawDelete(String sql, [List<dynamic> arguments]) {
+  Future<int> rawDelete(String sql, [List<Object?>? arguments]) {
     checkRawArgs(arguments);
     return _rawDelete(sql, arguments);
   }
 
-  Future<int> _rawDelete(String sql, [List<dynamic> arguments]) =>
+  Future<int> _rawDelete(String sql, [List<Object?>? arguments]) =>
       rawUpdate(sql, arguments);
 
   /// Convenience method for deleting rows in the database.
@@ -197,24 +197,29 @@ mixin SqfliteDatabaseExecutorMixin implements SqfliteDatabaseExecutor {
   /// otherwise. To remove all rows and get a count pass '1' as the
   /// whereClause.
   @override
-  Future<int> delete(String table, {String where, List<dynamic> whereArgs}) {
+  Future<int> delete(String table, {String? where, List<Object?>? whereArgs}) {
     final builder =
         SqlBuilder.delete(table, where: where, whereArgs: whereArgs);
     return _rawDelete(builder.sql, builder.arguments);
   }
 }
+
+/// Sqflite database mixin.
 mixin SqfliteDatabaseMixin implements SqfliteDatabase {
+  /// Invoke native method and wrap exception.
   Future<T> safeInvokeMethod<T>(String method, [dynamic arguments]) =>
       factory.wrapDatabaseException(() => invokeMethod(method, arguments));
 
   /// Keep our open helper for proper closing.
-  SqfliteDatabaseOpenHelper openHelper;
+  SqfliteDatabaseOpenHelper? openHelper;
   @override
-  OpenDatabaseOptions options;
+  OpenDatabaseOptions? options;
 
-  SqfliteDatabaseFactory get factory => openHelper.factory;
+  /// The factory.
+  SqfliteDatabaseFactory get factory => openHelper!.factory;
 
-  bool get readOnly => openHelper?.options?.readOnly == true;
+  /// try if open in read-only mode.
+  bool get readOnly => openHelper?.options?.readOnly ?? false;
 
   @override
   SqfliteDatabase get db => this;
@@ -224,10 +229,10 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   bool isClosed = false;
 
   @override
-  bool get isOpen => openHelper.isOpen;
+  bool get isOpen => openHelper!.isOpen;
 
   @override
-  String path;
+  late String path;
 
   /// Transaction reference count.
   ///
@@ -237,30 +242,32 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   /// Special transaction created during open.
   ///
   /// Only not null during opening.
-  SqfliteTransaction openTransaction;
+  SqfliteTransaction? openTransaction;
 
   @override
-  SqfliteTransaction get txn => openTransaction;
+  SqfliteTransaction? get txn => openTransaction;
 
   /// Non-reentrant lock.
   final Lock rawLock = Lock();
 
   // Its internal id
   @override
-  int id;
+  int? id;
 
   /// Set when parsing BEGIN and COMMIT/ROLLBACK
   bool inTransaction = false;
 
-  static Map<String, dynamic> getBaseDatabaseMethodArguments(int id) {
-    final map = <String, dynamic>{
+  /// Base database map parameter.
+  static Map<String, Object?> getBaseDatabaseMethodArguments(int id) {
+    final map = <String, Object?>{
       paramId: id,
     };
     return map;
   }
 
-  static Map<String, dynamic> getBaseDatabaseMethodArgumentsInTransaction(
-      int id, bool inTransaction) {
+  /// Base database map parameter in transaction.
+  static Map<String, Object?> getBaseDatabaseMethodArgumentsInTransaction(
+      int id, bool? inTransaction) {
     final map = getBaseDatabaseMethodArguments(id);
     if (inTransaction != null) {
       map[paramInTransaction] = inTransaction;
@@ -268,8 +275,9 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
     return map;
   }
 
-  Map<String, dynamic> get baseDatabaseMethodArguments =>
-      getBaseDatabaseMethodArguments(id);
+  /// Base database map parameter.
+  Map<String, Object?> get baseDatabaseMethodArguments =>
+      getBaseDatabaseMethodArguments(id!);
 
   @override
   Batch batch() {
@@ -283,6 +291,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
     }
   }
 
+  /// Invoke the native method of the factory.
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) =>
       factory.invokeMethod(method, arguments);
 
@@ -290,15 +299,15 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   Future<T> devInvokeMethod<T>(String method, [dynamic arguments]) {
     return invokeMethod<T>(
         method,
-        (arguments ?? <String, dynamic>{})
+        (arguments ?? <String, Object?>{})
           ..addAll(baseDatabaseMethodArguments));
   }
 
   @override
   Future<T> devInvokeSqlMethod<T>(String method, String sql,
-      [List<dynamic> arguments]) {
+      [List<Object?>? arguments]) {
     return devInvokeMethod(
-        method, <String, dynamic>{paramSql: sql, paramSqlArguments: arguments});
+        method, <String, Object?>{paramSql: sql, paramSqlArguments: arguments});
   }
 
   /// synchronized call to the database
@@ -306,7 +315,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   /// Ugly compatibility step to not support older synchronized
   /// mechanism
   Future<T> txnSynchronized<T>(
-      Transaction txn, Future<T> Function(Transaction txn) action) async {
+      Transaction? txn, Future<T> Function(Transaction? txn) action) async {
     // If in a transaction, execute right away
     if (txn != null) {
       return await action(txn);
@@ -314,7 +323,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
       // Simple timeout warning if we cannot get the lock after XX seconds
       final handleTimeoutWarning = (utils.lockWarningDuration != null &&
           utils.lockWarningCallback != null);
-      Completer<dynamic> timeoutCompleter;
+      late Completer<dynamic> timeoutCompleter;
       if (handleTimeoutWarning) {
         timeoutCompleter = Completer<dynamic>();
       }
@@ -329,9 +338,9 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
       // Simply warn the developer as this could likely be a deadlock
       if (handleTimeoutWarning) {
         // ignore: unawaited_futures
-        timeoutCompleter.future.timeout(utils.lockWarningDuration,
+        timeoutCompleter.future.timeout(utils.lockWarningDuration!,
             onTimeout: () {
-          utils.lockWarningCallback();
+          utils.lockWarningCallback!();
         });
       }
       return await operation;
@@ -341,13 +350,13 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   /// synchronized call to the database
   /// not re-entrant
   Future<T> txnWriteSynchronized<T>(
-          Transaction txn, Future<T> Function(Transaction txn) action) =>
+          Transaction? txn, Future<T> Function(Transaction? txn) action) =>
       txnSynchronized(txn, action);
 
   /// for sql without return values
   @override
-  Future<T> txnExecute<T>(SqfliteTransaction txn, String sql,
-      [List<dynamic> arguments]) {
+  Future<T> txnExecute<T>(SqfliteTransaction? txn, String sql,
+      [List<Object?>? arguments]) {
     return txnWriteSynchronized<T>(txn, (_) {
       var inTransactionChange = getSqlInTransactionArgument(sql);
 
@@ -358,66 +367,70 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
         inTransactionChange = false;
         inTransaction = false;
       }
-
       return invokeExecute<T>(sql, arguments,
           inTransactionChange: inTransactionChange);
     });
   }
 
   /// [inTransactionChange] is true when entering a transaction, false when leaving
-  Future<T> invokeExecute<T>(String sql, List<dynamic> arguments,
-      {bool inTransactionChange}) {
+  Future<T> invokeExecute<T>(String sql, List<Object?>? arguments,
+      {bool? inTransactionChange}) {
     return safeInvokeMethod(
         methodExecute,
-        <String, dynamic>{paramSql: sql, paramSqlArguments: arguments}..addAll(
+        <String, Object?>{paramSql: sql, paramSqlArguments: arguments}..addAll(
             getBaseDatabaseMethodArgumentsInTransaction(
-                id, inTransactionChange)));
+                id!, inTransactionChange)));
   }
 
   /// for INSERT sql query
   /// returns the last inserted record id
+  ///
+  /// 0 returned instead of null
   @override
   Future<int> txnRawInsert(
-      SqfliteTransaction txn, String sql, List<dynamic> arguments) {
-    return txnWriteSynchronized(txn, (_) {
-      return safeInvokeMethod<int>(
-          methodInsert,
-          <String, dynamic>{paramSql: sql, paramSqlArguments: arguments}
-            ..addAll(baseDatabaseMethodArguments));
+      SqfliteTransaction? txn, String sql, List<Object?>? arguments) {
+    return txnWriteSynchronized(txn, (_) async {
+      // The value could be null (for insert ignore). Return 0 in this case
+      return await safeInvokeMethod<int?>(
+              methodInsert,
+              <String, Object?>{paramSql: sql, paramSqlArguments: arguments}
+                ..addAll(baseDatabaseMethodArguments)) ??
+          0;
     });
   }
 
   @override
-  Future<List<Map<String, dynamic>>> txnRawQuery(
-      SqfliteTransaction txn, String sql, List<dynamic> arguments) {
+  Future<List<Map<String, Object?>>> txnRawQuery(
+      SqfliteTransaction? txn, String sql, List<Object?>? arguments) {
     return txnSynchronized(txn, (_) async {
       final dynamic result = await safeInvokeMethod<dynamic>(
           methodQuery,
-          <String, dynamic>{paramSql: sql, paramSqlArguments: arguments}
+          <String, Object?>{paramSql: sql, paramSqlArguments: arguments}
             ..addAll(baseDatabaseMethodArguments));
       return queryResultToList(result);
     });
   }
 
-  /// for INSERT sql query
-  /// returns the last inserted record id
+  /// for Update sql query
+  /// returns the update count
   @override
   Future<int> txnRawUpdate(
-      SqfliteTransaction txn, String sql, List<dynamic> arguments) {
-    return txnWriteSynchronized(txn, (_) {
-      return safeInvokeMethod<int>(
+      SqfliteTransaction? txn, String sql, List<Object?>? arguments) {
+    return txnWriteSynchronized(txn, (_) async {
+      final result = await safeInvokeMethod<int?>(
           methodUpdate,
-          <String, dynamic>{paramSql: sql, paramSqlArguments: arguments}
+          <String, Object?>{paramSql: sql, paramSqlArguments: arguments}
             ..addAll(baseDatabaseMethodArguments));
+      return result ?? 0;
     });
   }
 
   @override
-  Future<List<dynamic>> txnApplyBatch(
+  Future<List<Object?>> txnApplyBatch(
       SqfliteTransaction txn, SqfliteBatch batch,
-      {bool noResult, bool continueOnError}) {
+      {bool? noResult, bool? continueOnError}) {
     return txnWriteSynchronized(txn, (_) async {
-      final arguments = <String, dynamic>{paramOperations: batch.operations}
+      final arguments = <String, Object?>{paramOperations: batch.operations}
         ..addAll(baseDatabaseMethodArguments);
       if (noResult == true) {
         arguments[paramNoResult] = noResult;
@@ -426,11 +439,11 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
         arguments[paramContinueOnError] = continueOnError;
       }
       final results =
-          await safeInvokeMethod<List<dynamic>>(methodBatch, arguments);
+          await safeInvokeMethod<List<dynamic>?>(methodBatch, arguments);
 
       // Typically when noResult is true
       if (results == null) {
-        return null;
+        return <dynamic>[];
       }
       // dart2 - wrap if we need to support more results than just int
       return BatchResults.from(results);
@@ -438,7 +451,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   }
 
   @override
-  Future<SqfliteTransaction> beginTransaction({bool exclusive}) async {
+  Future<SqfliteTransaction> beginTransaction({bool? exclusive}) async {
     final txn = SqfliteTransaction(this);
     // never create transaction in read-only mode
     if (readOnly != true) {
@@ -464,15 +477,15 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   }
 
   Future<T> _runTransaction<T>(
-      Transaction txn, Future<T> Function(Transaction txn) action,
-      {bool exclusive}) async {
-    bool successfull;
+      Transaction? txn, Future<T> Function(Transaction txn) action,
+      {bool? exclusive}) async {
+    bool? successfull;
     if (transactionRefCount++ == 0) {
       txn = await beginTransaction(exclusive: exclusive);
     }
     T result;
     try {
-      result = await action(txn);
+      result = await action(txn!);
       successfull = true;
     } finally {
       if (--transactionRefCount == 0) {
@@ -486,9 +499,9 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
 
   @override
   Future<T> transaction<T>(Future<T> Function(Transaction txn) action,
-      {bool exclusive}) {
+      {bool? exclusive}) {
     checkNotClosed();
-    return txnWriteSynchronized<T>(txn, (Transaction txn) async {
+    return txnWriteSynchronized<T>(txn, (Transaction? txn) async {
       return _runTransaction(txn, action, exclusive: exclusive);
     });
   }
@@ -499,7 +512,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
   @override
   Future<int> getVersion() async {
     final rows = await rawQuery('PRAGMA user_version');
-    return firstIntValue(rows);
+    return firstIntValue(rows) ?? 0;
   }
 
   ///
@@ -524,8 +537,9 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
     return '$id $path';
   }
 
+  /// Open a database and returns its id.
   Future<int> openDatabase() async {
-    final params = <String, dynamic>{paramPath: path};
+    final params = <String, Object?>{paramPath: path};
     if (readOnly == true) {
       params[paramReadOnly] = true;
     }
@@ -540,10 +554,11 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
     // doing first on Android without breaking ios
     final dynamic openResult =
         await safeInvokeMethod(methodOpenDatabase, params);
+    // devPrint('open result $openResult');
     if (openResult is int) {
       return openResult;
     } else if (openResult is Map) {
-      final id = openResult[paramId] as int;
+      final id = openResult[paramId] as int?;
       // Recover means we found an instance in the native world
       final recoveredInTransaction =
           openResult[paramRecoveredInTransaction] == true;
@@ -556,28 +571,25 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
           try {
             await safeInvokeMethod(
                 methodExecute,
-                <String, dynamic>{paramSql: 'ROLLBACK'}..addAll(
-                    getBaseDatabaseMethodArgumentsInTransaction(id, false)));
+                <String, Object?>{paramSql: 'ROLLBACK'}..addAll(
+                    getBaseDatabaseMethodArgumentsInTransaction(id!, false)));
           } catch (e) {
             print('ignore recovered database ROLLBACK error $e');
           }
         }
       }
-      return id;
+      return id!;
     } else {
-      if (openResult != null) {
-        throw 'unsupported result $openResult (${openResult?.runtimeType}';
-      }
-      return null;
+      throw 'unsupported result $openResult (${openResult?.runtimeType})';
     }
   }
 
   final Lock _closeLock = Lock();
 
   /// rollback any pending transaction if needed
-  Future<void> _closeDatabase(int databaseId) async {
+  Future<void> _closeDatabase(int? databaseId) async {
     await _closeLock.synchronized(() async {
-      // devPrint('_closeDatabase closing $databaseId');
+      // devPrint('_closeDatabase closing $databaseId inTransaction $inTransaction isClosed $isClosed readOnly $readOnly');
       if (!isClosed) {
         // Mark as closed now
         isClosed = true;
@@ -586,7 +598,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
           // Grab lock to prevent future access
           // At least we know no other request will be ran
           try {
-            await txnWriteSynchronized(txn, (Transaction txn) async {
+            await txnWriteSynchronized(txn, (Transaction? txn) async {
               // Special trick to cancel any pending transaction
               try {
                 await invokeExecute<dynamic>('ROLLBACK', null,
@@ -595,14 +607,16 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
                 // devPrint('rollback error $_');
               }
             });
-          } catch (_) {}
+          } catch (e) {
+            print('Error $e before rollback');
+          }
         }
 
         // close for good
         // Catch exception, close should never fail
         try {
           await safeInvokeMethod<dynamic>(
-              methodCloseDatabase, <String, dynamic>{paramId: databaseId});
+              methodCloseDatabase, <String, Object?>{paramId: databaseId});
         } catch (e) {
           print('error $e closing database $databaseId');
         }
@@ -656,7 +670,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
             // Since we deleted the database re-run the needed first steps:
             // onConfigure then onCreate
             if (options.onConfigure != null) {
-              await options.onConfigure(db);
+              await options.onConfigure!(db);
             }
           } catch (e) {
             // This exception is sometimes hard te catch
@@ -671,7 +685,7 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
           // no end transaction it will be done later before calling then onOpen
           await db.beginTransaction(exclusive: true);
           if (options.onCreate != null) {
-            await options.onCreate(db, options.version);
+            await options.onCreate!(db, options.version!);
           }
         }
 
@@ -685,40 +699,46 @@ mixin SqfliteDatabaseMixin implements SqfliteDatabase {
 
       // first configure it
       if (options.onConfigure != null) {
-        await options.onConfigure(this);
+        await options.onConfigure!(this);
       }
 
       if (options.version != null) {
-        await transaction((Transaction txn) async {
-          // Set the current transaction as the open one
-          // to allow direct database call during open
-          final sqfliteTransaction = txn as SqfliteTransaction;
-          openTransaction = sqfliteTransaction;
+        // Check the version outside of the transaction
+        // And only create the transaction if needed (https://github.com/tekartik/sqflite/issues/459)
+        final oldVersion = await getVersion();
+        if (oldVersion != options.version) {
+          await transaction((Transaction txn) async {
+            // Set the current transaction as the open one
+            // to allow direct database call during open
+            final sqfliteTransaction = txn as SqfliteTransaction;
+            openTransaction = sqfliteTransaction;
 
-          final oldVersion = await getVersion();
-          if (oldVersion == null || oldVersion == 0) {
-            if (options.onCreate != null) {
-              await options.onCreate(this, options.version);
-            } else if (options.onUpgrade != null) {
-              await options.onUpgrade(this, 0, options.version);
+            // We read again the version to be safe regarding edge cases
+            final oldVersion = await getVersion();
+            if (oldVersion == 0) {
+              if (options.onCreate != null) {
+                await options.onCreate!(this, options.version!);
+              } else if (options.onUpgrade != null) {
+                await options.onUpgrade!(this, 0, options.version!);
+              }
+            } else if (options.version! > oldVersion) {
+              if (options.onUpgrade != null) {
+                await options.onUpgrade!(this, oldVersion, options.version!);
+              }
+            } else if (options.version! < oldVersion) {
+              if (options.onDowngrade != null) {
+                await options.onDowngrade!(this, oldVersion, options.version!);
+              }
             }
-          } else if (options.version > oldVersion) {
-            if (options.onUpgrade != null) {
-              await options.onUpgrade(this, oldVersion, options.version);
+            if (oldVersion != options.version) {
+              await setVersion(options.version!);
             }
-          } else if (options.version < oldVersion) {
-            if (options.onDowngrade != null) {
-              await options.onDowngrade(this, oldVersion, options.version);
-            }
-          }
-          if (oldVersion != options.version) {
-            await setVersion(options.version);
-          }
-        }, exclusive: true);
+          }, exclusive: true);
+        }
       }
 
       if (options.onOpen != null) {
-        await options.onOpen(this);
+        await options.onOpen!(this);
       }
 
       return this;

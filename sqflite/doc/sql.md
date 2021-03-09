@@ -62,14 +62,20 @@ See [Conflict algorithm](conflict_algorithm.md) for conflict handling.
 
 ### transaction
 
-`transaction` handle the 'all or nothing' scenario. If one command fails, all other commands are reverted.
+`transaction` handle the 'all or nothing' scenario. If one command fails (and throws an error), all other commands are reverted.
 
 ```dart
 await db.transaction((txn) async {
-  await db.insert('my_table', {'name': 'my_name'});
-  await db.delete('my_table', where: 'name = ?', whereArgs: ['cat']);
+  await txn.insert('my_table', {'name': 'my_name'});
+  await txn.delete('my_table', where: 'name = ?', whereArgs: ['cat']);
 });
 ```
+
+* Make sure to sure the inner transaction object - `txn` in the code above - is used in a transaction (using the `db` object itself will cause a deadlock),
+* You can throw an error during a transaction to cancel a transaction,
+* When an error is thrown during a transaction, the action is cancelled right away and previous commands in the transaction are reverted,
+* No other concurrent modification on the database (even from an outside process) can happen during a transaction,
+* The inner part of the transaction is called only once, it is up to the developer to handle a try-again loop - assuming it can succeed at some point.
 
 ## Parameters
 
@@ -95,10 +101,25 @@ of values. This does not work. Instead you should list each argument one by one:
 var list = await db.rawQuery('SELECT * FROM my_table WHERE name IN (?, ?, ?)', ['cat', 'dog', 'fish']);
 ```
 
+### Parameter position
+
+You can use `?NNN` to specify a parameter position:
+
+```dart
+expect(
+  await db.rawQuery(
+    'SELECT ?1 as item1, ?2 as item2, ?1 + ?2 as sum', [3, 4]),
+    [{'item1': 3, 'item2': 4, 'sum': 7}]);
+```
+
+Be aware that Android binds argument as String. While it works in most cases (in where args), in the example above, the result
+ will be `[{'item1': '3', 'item2': '4', 'sum': 7}]);`. We might consider inlining num in the future.
+
+
 ## NULL value
 
 `NULL` is a special value. When testing for null in a query you should not do `'WHERE my_col = ?', [null]` but use 
-instead `WHERE my_col IS NULL`.
+instead `WHERE my_col IS NULL` or `WHERE my_col IS NOT NULL`.
 
 ```dart
 var list = await db.query('my_table', columns: ['name'], where: 'type IS NULL');
@@ -120,4 +141,31 @@ Look for items with `name` containing with 'free':
 var list = await db.query('my_table', columns: ['name'], where: 'name LIKE ?', whereArgs: ['%free%']);
 ```
 
+## SQLite schema information
 
+SQLite has a [`sqlite_master`](https://www.sqlite.org/faq.html#q7) table that store schema information:
+
+### Check if a table exists
+
+```dart
+Future<bool> tableExists(DatabaseExecutor db, String table) async {
+  var count = firstIntValue(await db.query('sqlite_master',
+      columns: ['COUNT(*)'],
+      where: 'type = ? AND name = ?',
+      whereArgs: ['table', table]));
+  return count > 0;
+}
+```
+
+### List table names
+
+```dart
+Future<List<String>> getTableNames(DatabaseExecutor db) async {
+  var tableNames = (await db
+          .query('sqlite_master', where: 'type = ?', whereArgs: ['table']))
+      .map((row) => row['name'] as String)
+      .toList(growable: false)
+        ..sort();
+  return tableNames;
+}
+```

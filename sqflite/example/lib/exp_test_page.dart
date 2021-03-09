@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common/sqflite_dev.dart';
 
 import 'test_page.dart';
 
@@ -438,6 +439,40 @@ CREATE TABLE test (
       }
     });
 
+    test('Defensive mode', () async {
+      // This shold succeed even on on iOS 14
+      var db = await openDatabase(inMemoryDatabasePath);
+      try {
+        await db.execute('CREATE TABLE Test(value TEXT)');
+        // Workaround for iOS 14
+        await db.execute('PRAGMA sqflite -- db_config_defensive_off');
+        await db.execute('PRAGMA writable_schema = ON');
+        expect(
+            await db.update(
+                'sqlite_master', {'sql': 'CREATE TABLE Test(value BLOB)'},
+                where: 'name = \'Test\' and type = \'table\''),
+            1);
+      } finally {
+        await db.close();
+      }
+    });
+
+    test('Defensive mode (should fail on iOS 14)', () async {
+      // This shold fail on iOS 14
+      var db = await openDatabase(inMemoryDatabasePath);
+      try {
+        await db.execute('CREATE TABLE Test(value TEXT)');
+        await db.execute('PRAGMA writable_schema = ON');
+        expect(
+            await db.update(
+                'sqlite_master', {'sql': 'CREATE TABLE Test(value BLOB)'},
+                where: 'name = \'Test\' and type = \'table\''),
+            1);
+      } finally {
+        await db.close();
+      }
+    });
+
     test('Issue#206', () async {
       //await Sqflite.devSetDebugModeOn(true);
       var path = await initDeleteDb('issue_206.db');
@@ -479,6 +514,29 @@ CREATE TABLE test (
       }
     });
 
+    test('Log level', () async {
+      // test setting log level
+      Database? db;
+      try {
+        // ignore: deprecated_member_use
+        await databaseFactory.setLogLevel(sqfliteLogLevelVerbose);
+        //await databaseFactory.setLogLevel(sqfliteLogLevelSql);
+        db = await openDatabase(inMemoryDatabasePath);
+        await db.execute('CREATE TABLE test (value TEXT UNIQUE)');
+        var table = 'test';
+        var map = <String, dynamic>{'value': 'test'};
+        await db.insert(table, map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+        expect(
+            Sqflite.firstIntValue(await db.query(table, columns: ['COUNT(*)'])),
+            1);
+      } finally {
+        // ignore: deprecated_member_use
+        await databaseFactory.setLogLevel(sqfliteLogLevelNone);
+        await db?.close();
+      }
+    });
+
     /*
     test('Isolate', () async {
       // This test does not work yet
@@ -504,7 +562,7 @@ CREATE TABLE test (
 
           int index = 0;
           SendPort sendPort;
-          List<Map<String, dynamic>> results;
+          List<Map<String, Object?>> results;
           var completer = Completer();
           var subscription = receivePort.listen((data) {
             switch (index++) {
@@ -516,7 +574,7 @@ CREATE TABLE test (
                 break;
               case 1:
                 // second is result
-                results = data as List<Map<String, dynamic>>;
+                results = data as List<Map<String, Object?>>;
                 completer.complete();
                 break;
             }
@@ -554,7 +612,7 @@ Future simpleInsertQueryIsolate(SendPort sendPort) async {
   var db = await openDatabase(path, version: 1, onCreate: (db, version) {
     db.execute('CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT)');
   });
-  List<Map<String, dynamic>> results;
+  List<Map<String, Object?>> results;
   try {
     await insert(db, 2);
     results = await db.rawQuery('SELECT id, name FROM Test');
