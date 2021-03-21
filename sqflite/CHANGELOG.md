@@ -1,3 +1,6 @@
+## 2.0.0
+* Stable version with NNBD support
+
 ## 2.0.0-nullsafety.0
 * NNBD support
 
