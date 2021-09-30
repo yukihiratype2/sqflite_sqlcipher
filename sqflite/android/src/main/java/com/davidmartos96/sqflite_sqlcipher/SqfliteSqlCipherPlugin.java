@@ -34,7 +34,6 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import static com.davidmartos96.sqflite_sqlcipher.Constant.CMD_GET;
 import static com.davidmartos96.sqflite_sqlcipher.Constant.ERROR_BAD_PARAM;
@@ -91,24 +90,6 @@ public class SqfliteSqlCipherPlugin implements FlutterPlugin, MethodCallHandler 
     @SuppressLint("UseSparseArrays")
     static final Map<Integer, Database> databaseMap = new HashMap<>();
 
-    // Needed public constructor
-    public SqfliteSqlCipherPlugin() {
-
-    }
-
-    // Testing only
-    public SqfliteSqlCipherPlugin(Context context) {
-        this.context = context.getApplicationContext();
-    }
-
-    //
-    // Plugin registration.
-    //
-    @SuppressWarnings("deprecation")
-    public static void registerWith(io.flutter.plugin.common.PluginRegistry.Registrar registrar) {
-        SqfliteSqlCipherPlugin sqflitePlugin = new SqfliteSqlCipherPlugin();
-        sqflitePlugin.onAttachedToEngine(registrar.context(), registrar.messenger());
-    }
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {

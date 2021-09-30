@@ -1,3 +1,6 @@
+## 2.1.0
+* Remove references to deprecated android plugin embedding v1
+
 ## 2.0.0
 * Stable version with NNBD support
 
