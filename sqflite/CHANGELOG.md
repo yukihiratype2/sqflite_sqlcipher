@@ -1,3 +1,8 @@
+## 2.1.1
+* SQLCipher version 4.5.0
+* Update Android build version
+* Update example project
+
 ## 2.1.0
 * Remove references to deprecated android plugin embedding v1
 
