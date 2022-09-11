@@ -651,7 +651,7 @@ static NSInteger _databaseOpenCount = 0;
     [queue inDatabase:^(FMDatabase *database) {
         if (password == nil) {
             [database setKey:@""];
-        } else {
+        } else {
             [database setKey:password];
         }
     }];
