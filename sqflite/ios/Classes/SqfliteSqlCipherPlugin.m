@@ -615,7 +615,7 @@ static NSInteger _databaseOpenCount = 0;
         @synchronized (self.mapLock) {
             SqfliteSqlCipherDatabase* database = self.singleInstanceDatabaseMap[path];
             if (database != nil) {
-                // Check if openedŸ
+                // Check if opened
                 if (_log) {
                     NSLog(@"re-opened %@singleInstance %@ id %@", database.inTransaction ? @"(in transaction) ": @"", path, database.databaseId);
                 }
@@ -634,7 +634,7 @@ static NSInteger _databaseOpenCount = 0;
                 NSLog(@"Creating parent dir %@", parentDir);
             }
             [[NSFileManager defaultManager] createDirectoryAtPath:parentDir withIntermediateDirectories:YES attributes:nil error:&error];
-            // Ingore the error, it will break later during open
+            // Ignore the error, it will break later during open
         }
     }
     FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:path flags:(readOnly ? SQLITE_OPEN_READONLY : (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE))];
