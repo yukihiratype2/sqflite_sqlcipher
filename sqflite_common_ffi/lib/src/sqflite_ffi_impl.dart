@@ -2,19 +2,17 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:path/path.dart';
-import 'package:sqflite_common/sqlite_api.dart';
+import 'package:sqflite_common/src/mixin/constant.dart'; // ignore: implementation_imports
 import 'package:sqflite_common_ffi/src/constant.dart';
 import 'package:sqflite_common_ffi/src/method_call.dart';
 import 'package:sqflite_common_ffi/src/sqflite_ffi_exception.dart';
-import 'package:sqflite_common_ffi/src/sqflite_import.dart';
-import 'package:sqflite_common/src/mixin/constant.dart'; // ignore: implementation_imports
 import 'package:sqlite3/sqlite3.dart' as ffi;
 import 'package:synchronized/extension.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'database_tracker.dart';
 
-final _debug = false; // devWarning(true); // false
+final _debug = false; //devWarning(true); // false
 // final _useIsolate = true; // devWarning(true); // true the default!
 
 String _prefix = '[sqflite]';
@@ -229,6 +227,22 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
     }
   }
 
+  /// Wrap the exception, keeping sql/sqlArguments in error
+  SqfliteFfiException wrapAnyExceptionNoIsolate(dynamic e) {
+    if (e is SqfliteFfiException) {
+      e.database ??= getDatabase();
+      e.sql ??= getSql();
+      e.sqlArguments ??= getSqlArguments();
+
+      return e;
+    } else if (e is ffi.SqliteException) {
+      return wrapAnyException(wrapSqlException(e));
+    } else {
+      return wrapAnyExceptionNoIsolate(
+          SqfliteFfiException(code: anyErrorCode, message: e.toString()));
+    }
+  }
+
   /// Main handling.
   Future<dynamic> handleImpl() async {
     // devPrint('$this');
@@ -295,14 +309,16 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
     return absolute(join('.dart_tool', 'sqflite_common_ffi', 'databases'));
   }
 
+  /// Read arguments as a map;
+  Map get argumentsMap => arguments as Map;
+
   /// Handle open database.
   Future handleOpenDatabase() async {
-    //dePrint(arguments);
-    var path = arguments['path'] as String;
+    var path = argumentsMap['path'] as String;
 
     //devPrint('opening $path');
-    var singleInstance = (arguments['singleInstance'] as bool?) ?? false;
-    var readOnly = (arguments['readOnly'] as bool?) ?? false;
+    var singleInstance = (argumentsMap['singleInstance'] as bool?) ?? false;
+    var readOnly = (argumentsMap['readOnly'] as bool?) ?? false;
     if (singleInstance) {
       var database = ffiSingleInstanceDbs[path];
       if (database != null) {
@@ -399,14 +415,14 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
   /// Get the id from the arguments.
   int? getDatabaseId() {
     if (arguments is Map) {
-      return arguments['id'] as int?;
+      return argumentsMap['id'] as int?;
     }
     return null;
   }
 
   /// Get the sql command.
   String? getSql() {
-    var sql = arguments['sql'] as String?;
+    var sql = argumentsMap['sql'] as String?;
     return sql;
   }
 
@@ -419,7 +435,7 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
   String? getPath() {
     var arguments = this.arguments;
     if (arguments is Map) {
-      var path = arguments['path'] as String?;
+      var path = argumentsMap['path'] as String?;
       if ((path != null) && !isInMemory(path) && isRelative(path)) {
         path = join(getDatabasesPath(), path);
       }
@@ -432,7 +448,7 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
   List<Object?>? getSqlArguments() {
     var arguments = this.arguments;
     if (arguments != null) {
-      var sqlArguments = arguments['arguments'] as List?;
+      var sqlArguments = argumentsMap['arguments'] as List?;
       if (sqlArguments != null) {
         // Check the argument, make it stricter
         for (var argument in sqlArguments) {
@@ -453,7 +469,7 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
 
   /// Get the no result argument.
   bool getNoResult() {
-    var noResult = arguments['noResult'] as bool?;
+    var noResult = argumentsMap['noResult'] as bool?;
     return noResult ?? false;
   }
 
@@ -461,14 +477,16 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
   ///
   // 'continueOnError': true
   bool getContinueOnError() {
-    var continueOnError = arguments['continueOnError'] as bool?;
+    var continueOnError = argumentsMap['continueOnError'] as bool?;
     return continueOnError ?? false;
   }
 
   /// Get the list of operations.
   List<SqfliteFfiOperation> getOperations() {
     var operations = <SqfliteFfiOperation>[];
-    arguments['operations'].cast<Map>().forEach((operationArgument) {
+    (argumentsMap['operations'] as List)
+        .cast<Map>()
+        .forEach((operationArgument) {
       operations.add(SqfliteFfiOperation()
         ..sql = operationArgument['sql'] as String?
         ..sqlArguments =
@@ -508,7 +526,7 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
   /// Handle options.
   Future handleOptions() async {
     if (arguments is Map) {
-      logLevel = (arguments['logLevel'] as int?) ?? sqfliteLogLevelNone;
+      logLevel = (argumentsMap['logLevel'] as int?) ?? sqfliteLogLevelNone;
     }
     return null;
   }

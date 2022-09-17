@@ -2,8 +2,6 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_test/sqflite_test.dart';
 import 'package:test/test.dart';
 
-import 'sqflite_test.dart';
-
 /// Run batch test.
 void run(SqfliteTestContext context) {
   final factory = context.databaseFactory;
@@ -123,7 +121,7 @@ void run(SqfliteTestContext context) {
       var path = await context.initDeleteDb('batch_in_transaction.db');
       var db = await factory.openDatabase(path);
 
-      var results;
+      List<Object?> results;
 
       await db.transaction((txn) async {
         var batch1 = txn.batch();

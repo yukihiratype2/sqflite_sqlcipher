@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/src/sqflite_import.dart';
 import 'package:sqflite/src/exception_impl.dart' as impl;
 import 'package:sqflite/src/sqflite_impl.dart' as impl;
+import 'package:sqflite/src/sqflite_import.dart';
 
 SqfliteDatabaseFactory? _databaseFactory;
 
@@ -21,7 +21,7 @@ DatabaseFactory get databaseFactory => sqfliteDatabaseFactory;
 set databaseFactory(DatabaseFactory? databaseFactory) {
   // Warn when changing. might throw in the future
   if (databaseFactory != null) {
-    if (!(databaseFactory is SqfliteDatabaseFactory)) {
+    if (databaseFactory is! SqfliteDatabaseFactory) {
       throw ArgumentError.value(
           databaseFactory, 'databaseFactory', 'Unsupported sqflite factory');
     }

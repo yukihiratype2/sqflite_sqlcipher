@@ -34,7 +34,7 @@ class Sqflite {
   ///
   /// To use during developpment/debugging
   /// Set extra dart and nativate debug logs
-  @deprecated
+  @Deprecated('Dev only')
   static Future<void> devSetDebugModeOn([bool on = true]) {
     impl.debugModeOn = on;
     return setDebugModeOn(on);
@@ -43,13 +43,13 @@ class Sqflite {
   /// Testing only.
   ///
   /// deprecated on purpose to remove from code.
-  @deprecated
+  @Deprecated('Dev only')
   static Future<void> devSetOptions(SqfliteOptions options) async {
     await invokeMethod<dynamic>(methodOptions, options.toMap());
   }
 
   /// Testing only
-  @deprecated
+  @Deprecated('Dev only')
   static Future<void> devInvokeMethod(String method,
       [dynamic arguments]) async {
     await invokeMethod<dynamic>(method, arguments);
@@ -92,7 +92,8 @@ class Sqflite {
 /// If [version] is specified, [onCreate], [onUpgrade], and [onDowngrade] can
 /// be called. These functions are mutually exclusive — only one of them can be
 /// called depending on the context, although they can all be specified to
-/// cover multiple scenarios
+/// cover multiple scenarios. If specified, it must be a 32-bits integer greater
+/// than 0.
 ///
 /// [onCreate] is called if the database did not exist prior to calling
 /// [openDatabase]. You can use the opportunity to create the required tables
@@ -156,7 +157,12 @@ Future<Database> openReadOnlyDatabase(String path) =>
 ///
 /// On Android, it is typically data/data/<package_name>/databases
 ///
-/// On iOS, it is the Documents directory
+/// On iOS and MacOS, it is the Documents directory.
+///
+/// Note for iOS: Using `path_provider` is recommended to get the
+/// databases directory. The most appropriate location on iOS would be
+/// the Library directory that you could get from the [`path_provider` package]
+/// (https://pub.dev/documentation/path_provider/latest/path_provider/getLibraryDirectory.html).
 ///
 Future<String> getDatabasesPath() => databaseFactory.getDatabasesPath();
 

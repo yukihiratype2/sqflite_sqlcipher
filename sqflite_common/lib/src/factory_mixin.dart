@@ -44,13 +44,11 @@ mixin SqfliteDatabaseFactoryMixin
   Map<String, SqfliteDatabaseOpenHelper> databaseOpenHelpers =
       <String, SqfliteDatabaseOpenHelper>{};
 
-  // open lock mechanism
-  @override
-  @deprecated
-  final Lock lock = Lock(reentrant: true);
-
   /// Avoid concurrent open operation on the same database
   Lock _getDatabaseOpenLock(String path) => _NamedLock(path).lock;
+
+  /// Optional tag (read-only)
+  String? tag;
 
   @override
   @override
@@ -109,7 +107,7 @@ mixin SqfliteDatabaseFactoryMixin
           setDatabaseOpenHelper(databaseOpenHelper);
         }
         try {
-          return await databaseOpenHelper!.openDatabase();
+          return await databaseOpenHelper.openDatabase();
         } catch (e) {
           // If first open fail remove the reference
           if (firstOpen) {
@@ -162,7 +160,13 @@ mixin SqfliteDatabaseFactoryMixin
 
   /// Set the databases path.
   @override
+  @Deprecated('Use setDatabasesPathOrNull')
   Future<void> setDatabasesPath(String? path) async {
+    setDatabasesPathOrNull(path);
+  }
+
+  /// Set the databases path.
+  void setDatabasesPathOrNull(String? path) {
     _databasesPath = path;
   }
 
@@ -184,18 +188,12 @@ mixin SqfliteDatabaseFactoryMixin
     return path;
   }
 
-  /// True if it is a real path. Unused?
-  @deprecated
-  bool isPath(String path) {
-    return !isInMemoryDatabasePath(path);
-  }
-
   /// Debug information.
   Future<SqfliteDebugInfo> getDebugInfo() async {
     final info = SqfliteDebugInfo();
-    final dynamic map =
-        await safeInvokeMethod(methodDebug, <String, Object?>{'cmd': 'get'});
-    final dynamic databasesMap = map[paramDatabases];
+    final map = await safeInvokeMethod<Map>(
+        methodDebug, <String, Object?>{'cmd': 'get'});
+    final databasesMap = map[paramDatabases];
     if (databasesMap is Map) {
       info.databases = databasesMap.map((dynamic id, dynamic info) {
         final dbInfo = SqfliteDatabaseDebugInfo();
@@ -210,6 +208,9 @@ mixin SqfliteDatabaseFactoryMixin
     info.logLevel = map[paramLogLevel] as int?;
     return info;
   }
+
+  @override
+  String toString() => 'SqfliteDatabaseFactory(${tag ?? 'sqflite'})';
 }
 
 // When opening the database (bool)

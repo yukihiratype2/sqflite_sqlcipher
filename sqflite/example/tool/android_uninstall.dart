@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:process_run/shell.dart';
 
 Future<void> main() async {
@@ -6,7 +5,7 @@ Future<void> main() async {
 
   await shell.run('''
 
-adb uninstall com.terkartik.sqfliteexample
+adb uninstall com.tekartik.sqfliteexample
 
 ''');
 }

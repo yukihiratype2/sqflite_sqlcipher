@@ -1,9 +1,11 @@
 @TestOn('vm')
 library sqflite_common_ffi.test.sqflite_factory_ffi_test;
 
-import 'package:test/test.dart';
+import 'dart:typed_data';
+
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:test/test.dart';
 
 void main() {
   // Set sqflite ffi support in test
@@ -28,5 +30,32 @@ void main() {
   test('databasesPath', () async {
     var originalDatabasesPath = await databaseFactory.getDatabasesPath();
     expect(originalDatabasesPath, isNotNull);
+  });
+  test('exception', () async {
+    var db = await databaseFactory.openDatabase(inMemoryDatabasePath);
+
+    try {
+      await db.insert('test', <String, Object?>{
+        'blob': Uint8List.fromList([1, 2, 3])
+      });
+      fail('should fail');
+    } catch (e) {
+      expect(e.toString(), contains('Blob(3)'));
+      expect(e.toString(), isNot(contains([1, 2, 3])));
+      // print(e);
+    }
+    try {
+      var batch = db.batch();
+      batch.insert('test', <String, Object?>{
+        'blob': Uint8List.fromList([1, 2, 3])
+      });
+      await batch.commit();
+      fail('should fail');
+    } catch (e) {
+      expect(e.toString(), isNot(contains([1, 2, 3])));
+      // print(e);
+    }
+
+    await db.close();
   });
 }

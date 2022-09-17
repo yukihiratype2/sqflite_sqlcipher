@@ -1,3 +1,4 @@
+import 'package:sqflite_common/src/arg_utils.dart';
 import 'package:sqflite_common/src/constant.dart';
 
 /// Wrap sqlite native exception
@@ -95,6 +96,12 @@ abstract class DatabaseException implements Exception {
   /// This might involve parsing the sqlite native message to extract the code
   /// See https://www.sqlite.org/rescode.html for the list of result code
   int? getResultCode();
+
+  /// Platform specific error result.
+  ///
+  /// Its content is platform dependent and used internally and could change
+  /// in the future but could help in analyzing the error.
+  Object? get result;
 }
 
 /// Exception implementation
@@ -112,17 +119,21 @@ class SqfliteDatabaseException extends DatabaseException {
   int? _resultCode;
 
   /// Typically the result of a native call
-  dynamic result;
+  @override
+  Object? result;
+
+  /// The result as a map
+  Map get resultMap => result as Map;
 
   @override
   String toString() {
     if (result is Map) {
-      if (result[paramSql] != null) {
-        final dynamic args = result[paramSqlArguments];
-        if (args == null) {
-          return "DatabaseException($_message) sql '${result[paramSql]}'";
+      if (resultMap[paramSql] != null) {
+        final dynamic args = resultMap[paramSqlArguments];
+        if (args is List) {
+          return "DatabaseException($_message) sql '${resultMap[paramSql]}' args ${argumentsToString(args)}";
         } else {
-          return "DatabaseException($_message) sql '${result[paramSql]}' args $args}";
+          return "DatabaseException($_message) sql '${resultMap[paramSql]}'";
         }
       }
     }

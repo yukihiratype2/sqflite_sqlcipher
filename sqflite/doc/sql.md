@@ -21,7 +21,7 @@ and common pitfalls.
 
 ```dart
 // Create a table
-await db.execute('CREATE TABLE my_table (id INTEGER PRIMARY KEY AUTO INCREMENT, name TEXT, type TEXT)');
+await db.execute('CREATE TABLE my_table (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, type TEXT)');
 ```
 
 ### insert
@@ -40,6 +40,31 @@ See [Conflict algorithm](conflict_algorithm.md) for conflict handling.
 
 ```dart
 var list = await db.query('my_table', columns: ['name', 'type']);
+```
+
+The list is read-only. If you want to modify the results by adding/deleting items in memory,
+you need to clone the list:
+
+```dart
+// This throws an error
+list.add(<String, Object?>{'name': 'some data'});
+```
+```dart
+// This works
+list = List.from(list)
+list.add(<String, Object?>{'name': 'some data'});
+```
+
+Each item (map) of the list is read-only too so you need to clone it if you want to modify the result.
+```dart
+map = list.first;
+// This crashes
+map['name'] = 'other';
+```
+```dart
+// This works
+map = Map.from(map);
+map['name'] = 'other';
 ```
 
 ### delete
@@ -99,6 +124,19 @@ of values. This does not work. Instead you should list each argument one by one:
 
 ```dart
 var list = await db.rawQuery('SELECT * FROM my_table WHERE name IN (?, ?, ?)', ['cat', 'dog', 'fish']);
+```
+
+Since the list size can change, having the proper number or `?` can be solved using the following solution:
+
+```dart
+List.filled(inArgsCount, '?').join(',')
+```
+
+```dart
+var inArgs = ['cat', 'dog', 'fish'];
+var list = await db.query('my_table',
+  where: 'name IN (${List.filled(inArgs.length, '?').join(',')})',
+  whereArgs: inArgs);
 ```
 
 ### Parameter position

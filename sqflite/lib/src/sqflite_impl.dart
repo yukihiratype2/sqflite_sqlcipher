@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:core';
 
 import 'services_impl.dart';
@@ -10,7 +9,7 @@ const String channelName = 'com.tekartik.sqflite';
 const MethodChannel channel = MethodChannel(channelName);
 
 /// Temp flag to test concurrent reads
-final supportsConcurrency = false;
+const supportsConcurrency = false;
 
 /// Invoke a native method
 Future<T> invokeMethod<T>(String method, [dynamic arguments]) =>

@@ -11,6 +11,8 @@ export 'package:sqflite_common/src/constant.dart'
         sqfliteLogLevelSql,
         sqfliteLogLevelVerbose;
 export 'package:sqflite_common/src/exception.dart' show DatabaseException;
+export 'package:sqflite_common/src/sqflite_debug.dart'
+    show SqfliteDatabaseFactoryDebug;
 
 /// Basic databases operations
 abstract class DatabaseFactory {
@@ -29,7 +31,15 @@ abstract class DatabaseFactory {
   /// Notice, `join` is a part of the [path](https://pub.dev/packages/path) package
   Future<Database> openDatabase(String path, {OpenDatabaseOptions? options});
 
-  /// Get the default databases location path
+  /// Get the default databases location path.
+  ///
+  /// When using sqfliteFactory:
+  /// * On Android, it is typically data/data/<package_name>/databases
+  /// * On iOS and MacOS, it is the Documents directory
+  ///
+  /// For other implementation (ffi), the location is a default location
+  /// that makes mainly sense for debug/testing and you'd better rely on a
+  /// custom strategy using package such as `path_provider`.
   Future<String> getDatabasesPath();
 
   /// Set the default databases location path
@@ -254,11 +264,11 @@ abstract class Database implements DatabaseExecutor {
   Future<void> setVersion(int version);
 
   /// testing only
-  @deprecated
+  @Deprecated('Dev only')
   Future<T> devInvokeMethod<T>(String method, [dynamic arguments]);
 
   /// testing only
-  @deprecated
+  @Deprecated('Dev only')
   Future<T> devInvokeSqlMethod<T>(String method, String sql,
       [List<Object?>? arguments]);
 }
@@ -314,7 +324,8 @@ abstract class OpenDatabaseOptions {
   ///
   /// [version] (optional) specifies the schema version of the database being
   /// opened. This is used to decide whether to call [onCreate], [onUpgrade],
-  /// and [onDowngrade]
+  /// and [onDowngrade]. If specified, it must be a 32-bits integer greater than
+  /// 0.
   ///
   /// The optional callbacks are called in the following order:
   ///

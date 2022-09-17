@@ -70,11 +70,11 @@ void expect(
 /// If the matcher fails asynchronously, that failure is piped to the returned
 /// future where it can be handled by user code.
 Future expectLater(actual, matcher, {String? reason, skip}) =>
-    _expect(actual, matcher, reason: reason, skip: skip);
+    _expect(actual, matcher, reason: reason, skip: skip) as Future;
 
 String _formatFailure(Matcher expected, actual, String which,
     {String? reason}) {
-  var buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.writeln(indent(prettyPrint(expected), first: 'Expected: '));
   buffer.writeln(indent(prettyPrint(actual), first: '  Actual: '));
   if (which.isNotEmpty) buffer.writeln(indent(which, first: '   Which: '));
@@ -83,14 +83,14 @@ String _formatFailure(Matcher expected, actual, String which,
 }
 
 /// The implementation of [expect] and [expectLater].
-Future _expect(actual, matcher,
+FutureOr _expect(actual, matcher,
     {String? reason,
     skip,
     bool verbose = false,
     // ignore: deprecated_member_use, deprecated_member_use_from_same_package
-    ErrorFormatter? formatter}) async {
+    ErrorFormatter? formatter}) {
   formatter ??= (actual, matcher, reason, matchState, verbose) {
-    var mismatchDescription = StringDescription();
+    final mismatchDescription = StringDescription();
     matcher.describeMismatch(actual, mismatchDescription, matchState, verbose);
 
     // ignore: deprecated_member_use
@@ -104,7 +104,7 @@ Future _expect(actual, matcher,
 
   matcher = wrapMatcher(matcher);
 
-  var matchState = {};
+  final matchState = {};
   try {
     if ((matcher as Matcher).matches(actual, matchState)) {
       return Future.sync(() {});
@@ -125,7 +125,7 @@ String indent(String text, {String? first}) {
   if (first != null) {
     return '$first $text';
   }
-  return '$text';
+  return text;
 }
 
 /// index text helper.
@@ -139,7 +139,7 @@ String prettyPrint(dynamic text, {String? first}) {
 /// The default error formatter.
 @Deprecated('Will be removed in 0.13.0.')
 String formatFailure(Matcher expected, actual, String which, {String? reason}) {
-  var buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.writeln(indent(prettyPrint(expected), first: 'Expected: '));
   buffer.writeln(indent(prettyPrint(actual), first: '  Actual: '));
   if (which.isNotEmpty) buffer.writeln(indent(which, first: '   Which: '));

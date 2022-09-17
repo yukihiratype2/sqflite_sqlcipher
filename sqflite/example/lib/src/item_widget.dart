@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-import '../model/item.dart';
+import 'package:sqflite_example/model/item.dart';
 
 /// Item widget.
 class ItemWidget extends StatefulWidget {
   /// Item widget.
-  ItemWidget(this.item, this.onTap, {this.summary});
+  const ItemWidget(this.item, this.onTap, {this.summary, Key? key})
+      : super(key: key);
 
   /// item summary.
   final String? summary;
@@ -15,9 +14,10 @@ class ItemWidget extends StatefulWidget {
   final Item item;
 
   /// Action when pressed (typically run).
-  final Function onTap; // = Function(MainItem item);
+  final Function(Item item) onTap; // = Function(MainItem item);
 
   @override
+  // ignore: library_private_types_in_public_api
   _ItemWidgetState createState() => _ItemWidgetState();
 }
 

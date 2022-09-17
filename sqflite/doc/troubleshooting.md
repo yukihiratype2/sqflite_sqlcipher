@@ -92,6 +92,28 @@ Advanced checks:
 Before raising this issue, try adding another well established plugin (the simplest being 
 `path_provider` or `shared_preferences`) to see if you get the error here as well.
 
+## Warning database has been locked for... 
+
+I you get this output in debug mode:
+> Warning database has been locked for 0:00:10.000000. Make sure you always use the transaction object for database operations during a transaction
+
+One common mistake is to use the db object in a transaction:
+
+```dart
+await db.transaction((txn) async {
+  // DEADLOCK HERE
+  await db.insert('my_table', {'name': 'my_name'});
+});
+```
+...instead of using the correct transaction object (below named `txn`):
+
+```dart
+await db.transaction((txn) async {
+  // Ok!
+  await txn.insert('my_table', {'name': 'my_name'});
+});
+```
+
 ## Debugging SQL commands
 
 A quick way to view SQL commands printed out is to call before opening any database
@@ -103,6 +125,8 @@ await Sqflite.devSetDebugModeOn(true);
 This call is on purpose deprecated to force removing it once the SQL issues has been resolved.
 
 ## iOS build issue
+
+### General
 
 I'm not an expert on iOS so it is hard for me reply to issues you encounter especially when you integrate
 into your app. Good if you can validate that you have no issue with other plugin such as `path_provider` and that
@@ -145,6 +169,38 @@ flutter run
 ```
 
 In the worst case, you can also re-create your ios project by deleting the ios/folder and running `flutter create .`
+
+### Undefined symbols for architecture armv7
+
+You might encounter this error on old projects or sometimes when sqflite is included by another dependency.
+
+I have not found a solution to fix this in sqflite itself so the fix has to be done in your application Podfile
+(you can just append this at the end of the `Podfile` file)
+
+```
+post_install do |installer|
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings["EXCLUDED_ARCHS"] = "armv7"
+  end
+end
+```
+
+You might also want to enforce a SDK version, sometimes just declaring `platform :ios, '9.0'` is not sufficient. Below
+is an example
+
+```
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '11.0'
+    end
+  end
+end
+```
+
+Since Flutter templates change over time for new sdk, you might sometimes try to delete the ios folder and re-create
+your project.
 
 ## Error in Flutter web
 

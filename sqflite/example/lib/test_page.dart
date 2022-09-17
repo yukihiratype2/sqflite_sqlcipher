@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:sqflite_example/src/common_import.dart';
 import 'package:sqflite_example/src/expect.dart';
 
@@ -14,10 +13,12 @@ export 'package:sqflite_example/database/database.dart';
 
 export 'src/expect.dart' show expect, fail;
 
+// ignore_for_file: avoid_print
+
 /// Base test page.
 class TestPage extends StatefulWidget {
   /// Base test page.
-  TestPage(this.title);
+  TestPage(this.title, {Key? key}) : super(key: key);
 
   /// The title.
   final String title;
@@ -32,12 +33,14 @@ class TestPage extends StatefulWidget {
 
   /// define a solo test.
   @Deprecated('SOLO_TEST - On purpose to remove before checkin')
+  // ignore: non_constant_identifier_names
   void solo_test(String name, FutureOr Function() fn) {
     tests.add(Test(name, fn, solo: true));
   }
 
   /// skip a test.
   @Deprecated('SKIP_TEST - On purpose to remove before checkin')
+  // ignore: non_constant_identifier_names
   void skip_test(String name, FutureOr Function() fn) {
     tests.add(Test(name, fn, skip: true));
   }
@@ -48,6 +51,7 @@ class TestPage extends StatefulWidget {
   }
 
   @override
+  // ignore: library_private_types_in_public_api
   _TestPageState createState() => _TestPageState();
 }
 
@@ -111,7 +115,7 @@ class _TestPageState extends State<TestPage> with Group {
       add(test);
     }
     for (var test in _tests) {
-      var item = Item('${test.name}');
+      var item = Item(test.name);
 
       late int position;
       setState(() {
@@ -121,11 +125,11 @@ class _TestPageState extends State<TestPage> with Group {
       try {
         await test.fn();
 
-        item = Item('${test.name}')..state = ItemState.success;
+        item = Item(test.name)..state = ItemState.success;
       } catch (e, st) {
         print(e);
         print(st);
-        item = Item('${test.name}')..state = ItemState.failure;
+        item = Item(test.name)..state = ItemState.failure;
       }
 
       if (!mounted) {
@@ -143,7 +147,7 @@ class _TestPageState extends State<TestPage> with Group {
       return null;
     }
 
-    var test = _tests[index];
+    final test = _tests[index];
 
     var item = items[index];
     setState(() {
@@ -154,13 +158,13 @@ class _TestPageState extends State<TestPage> with Group {
       await test.fn();
       print('TEST Done ${test.name}');
 
-      item = Item('${test.name}')..state = ItemState.success;
+      item = Item(test.name)..state = ItemState.success;
     } catch (e, st) {
       print('TEST Error $e running ${test.name}');
       try {
         print(st);
       } catch (_) {}
-      item = Item('${test.name}')..state = ItemState.failure;
+      item = Item(test.name)..state = ItemState.failure;
     }
 
     if (!mounted) {
@@ -188,7 +192,7 @@ class _TestPageState extends State<TestPage> with Group {
     return Scaffold(
         appBar: AppBar(title: Text(widget.title), actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             tooltip: 'Run again',
             onPressed: _run,
           ),
@@ -198,7 +202,7 @@ class _TestPageState extends State<TestPage> with Group {
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    var item = getItem(index);
+    final item = getItem(index);
     return ItemWidget(item, (Item item) {
       //Navigator.of(context).pushNamed(item.route);
       _runTest(index);

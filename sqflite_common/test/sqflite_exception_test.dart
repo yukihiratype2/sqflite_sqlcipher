@@ -1,5 +1,7 @@
-import 'package:test/test.dart';
+import 'dart:typed_data';
+
 import 'package:sqflite_common/src/exception.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('sqflite_exception', () {
@@ -134,6 +136,27 @@ void main() {
       exception =
           SqfliteDatabaseException('Error Domain=FMDatabase Code=19', null);
       expect(exception.getResultCode(), 19);
+    });
+
+    test('Exception args', () async {
+      var exception = SqfliteDatabaseException('test', {
+        'sql': 'statement',
+        'arguments': [
+          null,
+          1,
+          'short',
+          '123456789012345678901234567890123456789012345678901',
+          Uint8List.fromList([1, 2, 3])
+        ]
+      });
+      expect(exception.toString(),
+          'DatabaseException(test) sql \'statement\' args [null, 1, short, 12345678901234567890123456789012345678901234567890..., Blob(3)]');
+    });
+    test('Exception result', () async {
+      DatabaseException exception = SqfliteDatabaseException('test', 1);
+      expect(exception.result, 1);
+      exception = SqfliteDatabaseException('test', null);
+      expect(exception.result, isNull);
     });
   });
 }

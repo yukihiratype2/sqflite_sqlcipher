@@ -1,4 +1,13 @@
-## 2.0.0-nullsafety.7
+## 2.1.1
+
+* Windows binary 3.38.2
+
+## 2.1.0+2
+
+* Add `databaseFactoryFfiNoIsolate`
+* Fix windows release mode for basic ffi setup
+
+## 2.0.0+3
 
 * `nnbd` support
 * Improved sqlite shared lib loading mechanism to support alternate library.

@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-import '../model/main_item.dart';
+import 'package:sqflite_example/model/main_item.dart';
 
 /// Main item widget.
 class MainItemWidget extends StatefulWidget {
   /// Main item widget.
-  MainItemWidget(this.item, this.onTap);
+  const MainItemWidget(this.item, this.onTap, {Key? key}) : super(key: key);
 
   /// item data.
   final MainItem item;
 
   /// onTap action (typically run or open).
-  final Function onTap; // = Function(MainItem item);
+  final Function(MainItem item) onTap; // = Function(MainItem item);
 
   @override
+  // ignore: library_private_types_in_public_api
   _MainItemWidgetState createState() => _MainItemWidgetState();
 }
 

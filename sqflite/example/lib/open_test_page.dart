@@ -1,18 +1,23 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/src/database_mixin.dart' show SqfliteDatabaseMixin;
-import 'package:sqflite/src/factory_mixin.dart'
-    show SqfliteDatabaseFactoryMixin;
+import 'package:sqflite/src/database_mixin.dart' // ignore: implementation_imports
+    show
+        SqfliteDatabaseMixin;
+import 'package:sqflite/src/factory_mixin.dart' // ignore: implementation_imports
+    show
+        SqfliteDatabaseFactoryMixin;
 import 'package:sqflite_example/src/dev_utils.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'test_page.dart';
+// ignore_for_file: avoid_slow_async_io
+// ignore_for_file: avoid_print
 
 /// Open callbacks.
 class OpenCallbacks {
@@ -119,7 +124,8 @@ Future<bool> isDatabase(String path) async {
     db = await openReadOnlyDatabase(path);
     await db.getVersion();
     isDatabase = true;
-  } catch (_) {} finally {
+  } catch (_) {
+  } finally {
     await db?.close();
   }
   return isDatabase;
@@ -128,29 +134,29 @@ Future<bool> isDatabase(String path) async {
 /// Open test page.
 class OpenTestPage extends TestPage {
   /// Open test page.
-  OpenTestPage() : super('Open tests') {
-    var factory = databaseFactory;
+  OpenTestPage({Key? key}) : super('Open tests', key: key) {
+    final factory = databaseFactory;
 
     test('Databases path', () async {
       // await Sqflite.devSetDebugModeOn(false);
-      var databasesPath = await factory.getDatabasesPath();
+      final databasesPath = await factory.getDatabasesPath();
       // On Android we know it is current a 'databases' folder in the package folder
-      print('databasesPath: ' + databasesPath);
+      print('databasesPath: $databasesPath');
       if (Platform.isAndroid) {
         expect(basename(databasesPath), 'databases');
       } else if (Platform.isIOS) {
         expect(basename(databasesPath), 'Documents');
       }
-      var path = join(databasesPath, 'in_default_directory.db');
+      final path = join(databasesPath, 'in_default_directory.db');
       await factory.deleteDatabase(path);
-      var db = await factory.openDatabase(path);
+      final db = await factory.openDatabase(path);
       await db.close();
     });
     test('Delete database', () async {
       //await Sqflite.devSetDebugModeOn(false);
-      var path = await initDeleteDb('delete_database.db');
+      final path = await initDeleteDb('delete_database.db');
       expect(await databaseExists(path), false);
-      var db = await openDatabase(path);
+      final db = await openDatabase(path);
       await db.close();
       expect((await File(path).exists()), true);
       expect(await databaseExists(path), true);
@@ -162,9 +168,9 @@ class OpenTestPage extends TestPage {
 
     test('Open no version', () async {
       //await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_no_version.db');
+      final path = await initDeleteDb('open_no_version.db');
       expect((await File(path).exists()), false);
-      var db = await openDatabase(path);
+      final db = await openDatabase(path);
       verify(await File(path).exists());
       expect(await db.getVersion(), 0);
       await db.close();
@@ -172,9 +178,9 @@ class OpenTestPage extends TestPage {
 
     test('isOpen', () async {
       //await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('is_open.db');
+      final path = await initDeleteDb('is_open.db');
       expect((await File(path).exists()), false);
-      var db = await openDatabase(path);
+      final db = await openDatabase(path);
       expect(db.isOpen, true);
       verify(await File(path).exists());
       await db.close();
@@ -183,7 +189,7 @@ class OpenTestPage extends TestPage {
 
     test('Open no version onCreate', () async {
       // should fail
-      var path = await initDeleteDb('open_no_version_on_create.db');
+      final path = await initDeleteDb('open_no_version_on_create.db');
       verify(!(await File(path).exists()));
       Database? db;
       try {
@@ -199,10 +205,10 @@ class OpenTestPage extends TestPage {
 
     test('Open onCreate', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_test2.db');
+      final path = await initDeleteDb('open_test2.db');
       var onCreate = false;
       var onCreateTransaction = false;
-      var db = await openDatabase(path, version: 1,
+      final db = await openDatabase(path, version: 1,
           onCreate: (Database db, int version) async {
         expect(version, 1);
         onCreate = true;
@@ -220,12 +226,12 @@ class OpenTestPage extends TestPage {
 
     test('Simple onCreate', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_simple_on_create.db');
+      final path = await initDeleteDb('open_simple_on_create.db');
       expect(await isDatabase(path), isFalse);
 
-      var db =
+      final db =
           await openDatabase(path, version: 1, onCreate: (db, version) async {
-        var batch = db.batch();
+        final batch = db.batch();
 
         batch.execute('CREATE TABLE Test (id INTEGER PRIMARY KEY, text NAME)');
         await batch.commit();
@@ -234,8 +240,8 @@ class OpenTestPage extends TestPage {
         expect(
             await db.rawInsert('INSERT INTO Test (text) VALUES (?)', ['test']),
             1);
-        var result = await db.query('Test');
-        var expected = [
+        final result = await db.query('Test');
+        final expected = [
           {'id': 1, 'text': 'test'}
         ];
         expect(result, expected);
@@ -249,10 +255,10 @@ class OpenTestPage extends TestPage {
 
     test('Open 2 databases', () async {
       //await Sqflite.devSetDebugModeOn(true);
-      var path1 = await initDeleteDb('open_db_1.db');
-      var path2 = await initDeleteDb('open_db_2.db');
-      var db1 = await openDatabase(path1, version: 1);
-      var db2 = await openDatabase(path2, version: 1);
+      final path1 = await initDeleteDb('open_db_1.db');
+      final path2 = await initDeleteDb('open_db_2.db');
+      final db1 = await openDatabase(path1, version: 1);
+      final db2 = await openDatabase(path2, version: 1);
       await db1.close();
       await db2.close();
     });
@@ -260,7 +266,7 @@ class OpenTestPage extends TestPage {
     test('Open onUpgrade', () async {
       // await Sqflite.devSetDebugModeOn(true);
       var onUpgrade = false;
-      var path = await initDeleteDb('open_on_upgrade.db');
+      final path = await initDeleteDb('open_on_upgrade.db');
       var database = await openDatabase(path, version: 1,
           onCreate: (Database db, int version) async {
         await db.execute('CREATE TABLE Test(id INTEGER PRIMARY KEY)');
@@ -295,7 +301,7 @@ class OpenTestPage extends TestPage {
 
     test('Open onDowngrade', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_on_downgrade.db');
+      final path = await initDeleteDb('open_on_downgrade.db');
       var database = await openDatabase(path, version: 2,
           onCreate: (Database db, int version) async {
         await db.execute('CREATE TABLE Test(id INTEGER PRIMARY KEY)');
@@ -330,8 +336,8 @@ class OpenTestPage extends TestPage {
 
     test('Open asset database', () async {
       // await Sqflite.devSetDebugModeOn(false);
-      var databasesPath = await getDatabasesPath();
-      var path = join(databasesPath, 'asset_example.db');
+      final databasesPath = await getDatabasesPath();
+      final path = join(databasesPath, 'asset_example.db');
 
       // delete existing if any
       await deleteDatabase(path);
@@ -342,17 +348,17 @@ class OpenTestPage extends TestPage {
       } catch (_) {}
 
       // Copy from asset
-      var data = await rootBundle.load(join('assets', 'example.db'));
-      List<int> bytes =
+      final data = await rootBundle.load(join('assets', 'example.db'));
+      final List<int> bytes =
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
       // Write and flush the bytes written
       await File(path).writeAsBytes(bytes, flush: true);
 
       // open the database
-      var db = await openDatabase(path);
+      final db = await openDatabase(path);
 
       // Our database as a single table with a single element
-      var list = await db.rawQuery('SELECT * FROM Test');
+      final list = await db.rawQuery('SELECT * FROM Test');
       print('list $list');
       expect(list.first['name'], 'simple value');
 
@@ -360,11 +366,11 @@ class OpenTestPage extends TestPage {
     });
 
     test('Open on configure', () async {
-      var path = await initDeleteDb('open_on_configure.db');
+      final path = await initDeleteDb('open_on_configure.db');
 
       var onConfigured = false;
       var onConfiguredTransaction = false;
-      Future _onConfigure(Database db) async {
+      Future onConfigure(Database db) async {
         onConfigured = true;
         await db.execute('CREATE TABLE Test1 (id INTEGER PRIMARY KEY)');
         await db.transaction((txn) async {
@@ -373,7 +379,7 @@ class OpenTestPage extends TestPage {
         });
       }
 
-      var db = await openDatabase(path, onConfigure: _onConfigure);
+      final db = await openDatabase(path, onConfigure: onConfigure);
       expect(onConfigured, true);
       expect(onConfiguredTransaction, true);
 
@@ -383,7 +389,7 @@ class OpenTestPage extends TestPage {
     test('Open onDowngrade delete', () async {
       // await Sqflite.devSetDebugModeOn(false);
 
-      var path = await initDeleteDb('open_on_downgrade_delete.db');
+      final path = await initDeleteDb('open_on_downgrade_delete.db');
       var database = await openDatabase(path, version: 3,
           onCreate: (Database db, int version) async {
         await db.execute('CREATE TABLE Test(id INTEGER PRIMARY KEY)');
@@ -438,10 +444,10 @@ class OpenTestPage extends TestPage {
 
     test('All open callback', () async {
       // await Sqflite.devSetDebugModeOn(false);
-      var path = await initDeleteDb('open_all_callbacks.db');
+      final path = await initDeleteDb('open_all_callbacks.db');
 
       var step = 1;
-      var openCallbacks = OpenCallbacks();
+      final openCallbacks = OpenCallbacks();
       var db = await openCallbacks.open(path, version: 1);
       verify(openCallbacks.onConfigureCalled, 'onConfiguredCalled $step');
       verify(openCallbacks.onCreateCalled, 'onCreateCalled $step');
@@ -470,7 +476,7 @@ class OpenTestPage extends TestPage {
 
       openCallbacks.onDowngrade = onDatabaseDowngradeDelete;
       var configureCount = 0;
-      var callback = openCallbacks.onConfigure;
+      final callback = openCallbacks.onConfigure;
       // allow being called twice
       openCallbacks.onConfigure = (Database db) {
         if (configureCount == 1) {
@@ -495,31 +501,31 @@ class OpenTestPage extends TestPage {
 
     test('Open batch', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_batch.db');
+      final path = await initDeleteDb('open_batch.db');
 
-      Future _onConfigure(Database db) async {
-        var batch = db.batch();
+      Future onConfigure(Database db) async {
+        final batch = db.batch();
         batch.execute('CREATE TABLE Test (id INTEGER PRIMARY KEY, value TEXT)');
         await batch.commit();
       }
 
-      Future _onCreate(Database db, int version) async {
-        var batch = db.batch();
+      Future onCreate(Database db, int version) async {
+        final batch = db.batch();
         batch.rawInsert('INSERT INTO Test(value) VALUES("value1")');
         await batch.commit();
       }
 
-      Future _onOpen(Database db) async {
-        var batch = db.batch();
+      Future onOpen(Database db) async {
+        final batch = db.batch();
         batch.rawInsert('INSERT INTO Test(value) VALUES("value2")');
         await batch.commit();
       }
 
-      var db = await openDatabase(path,
+      final db = await openDatabase(path,
           version: 1,
-          onConfigure: _onConfigure,
-          onCreate: _onCreate,
-          onOpen: _onOpen);
+          onConfigure: onConfigure,
+          onCreate: onCreate,
+          onOpen: onOpen);
       expect(
           Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM Test')),
           2);
@@ -529,16 +535,16 @@ class OpenTestPage extends TestPage {
 
     test('Open read-only', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_read_only.db');
+      final path = await initDeleteDb('open_read_only.db');
 
-      Future _onCreate(Database db, int version) async {
-        var batch = db.batch();
+      Future onCreate(Database db, int version) async {
+        final batch = db.batch();
         batch.execute('CREATE TABLE Test (id INTEGER PRIMARY KEY, value TEXT)');
         batch.rawInsert('INSERT INTO Test(value) VALUES("value1")');
         await batch.commit();
       }
 
-      var db = await openDatabase(path, version: 1, onCreate: _onCreate);
+      var db = await openDatabase(path, version: 1, onCreate: onCreate);
       expect(
           Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM Test')),
           1);
@@ -558,7 +564,7 @@ class OpenTestPage extends TestPage {
         expect(e.isReadOnlyError(), true);
       }
 
-      var batch = db.batch();
+      final batch = db.batch();
       batch.rawQuery('SELECT COUNT(*) FROM Test');
       await batch.commit();
 
@@ -567,48 +573,48 @@ class OpenTestPage extends TestPage {
 
     test('Open demo (doc)', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_read_only.db');
+      final path = await initDeleteDb('open_read_only.db');
 
       {
-        Future _onConfigure(Database db) async {
+        Future onConfigure(Database db) async {
           // Add support for cascade delete
           await db.execute('PRAGMA foreign_keys = ON');
         }
 
-        var db = await openDatabase(path, onConfigure: _onConfigure);
+        final db = await openDatabase(path, onConfigure: onConfigure);
         await db.close();
       }
 
       {
-        Future _onCreate(Database db, int version) async {
+        Future onCreate(Database db, int version) async {
           // Database is created, delete the table
           await db.execute(
               'CREATE TABLE Test (id INTEGER PRIMARY KEY, value TEXT)');
         }
 
-        Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+        Future onUpgrade(Database db, int oldVersion, int newVersion) async {
           // Database version is updated, alter the table
           await db.execute('ALTER TABLE Test ADD name TEXT');
         }
 
         // Special callback used for onDowngrade here to recreate the database
-        var db = await openDatabase(path,
+        final db = await openDatabase(path,
             version: 1,
-            onCreate: _onCreate,
-            onUpgrade: _onUpgrade,
+            onCreate: onCreate,
+            onUpgrade: onUpgrade,
             onDowngrade: onDatabaseDowngradeDelete);
         await db.close();
       }
 
       {
-        Future _onOpen(Database db) async {
+        Future onOpen(Database db) async {
           // Database is open, print its version
           print('db version ${await db.getVersion()}');
         }
 
-        var db = await openDatabase(
+        final db = await openDatabase(
           path,
-          onOpen: _onOpen,
+          onOpen: onOpen,
         );
         await db.close();
       }
@@ -616,8 +622,8 @@ class OpenTestPage extends TestPage {
       // asset (use existing copy if any
       {
         // Check if we have an existing copy first
-        var databasesPath = await getDatabasesPath();
-        var path = join(databasesPath, 'demo_asset_example.db');
+        final databasesPath = await getDatabasesPath();
+        final path = join(databasesPath, 'demo_asset_example.db');
 
         // try opening (will work if it exists)
         Database? db;
@@ -632,8 +638,8 @@ class OpenTestPage extends TestPage {
           print('Creating new copy from asset');
 
           // Copy from asset
-          var data = await rootBundle.load(join('assets', 'example.db'));
-          var bytes =
+          final data = await rootBundle.load(join('assets', 'example.db'));
+          final bytes =
               data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
           await File(path).writeAsBytes(bytes);
 
@@ -649,21 +655,21 @@ class OpenTestPage extends TestPage {
 
     test('Database locked (doc)', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('open_locked.db');
-      var helper = Helper(path);
+      final path = await initDeleteDb('open_locked.db');
+      final helper = Helper(path);
 
       // without the synchronized fix, this could faild
       for (var i = 0; i < 100; i++) {
         // ignore: unawaited_futures
         helper.getDb();
       }
-      var db = await helper.getDb();
+      final db = await helper.getDb();
       await db.close();
     });
 
     test('single/multi instance (using factory)', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('instances_test.db');
+      final path = await initDeleteDb('instances_test.db');
       Database? db1, db2, db3;
       try {
         db1 = await databaseFactory.openDatabase(path,
@@ -683,10 +689,10 @@ class OpenTestPage extends TestPage {
 
     test('single/multi instance', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('instances_test.db');
-      var db1 = await openDatabase(path, singleInstance: false);
-      var db2 = await openDatabase(path, singleInstance: true);
-      var db3 = await openDatabase(path, singleInstance: true);
+      final path = await initDeleteDb('instances_test.db');
+      final db1 = await openDatabase(path, singleInstance: false);
+      final db2 = await openDatabase(path, singleInstance: true);
+      final db3 = await openDatabase(path, singleInstance: true);
       verify(db1 != db2);
       verify(db2 == db3);
       await db1.close();
@@ -695,9 +701,9 @@ class OpenTestPage extends TestPage {
     });
 
     test('In memory database', () async {
-      var inMemoryPath =
+      const inMemoryPath =
           inMemoryDatabasePath; // tried null without success, as it crashes on Android
-      var path = inMemoryPath;
+      const path = inMemoryPath;
 
       var db = await openDatabase(path);
       await db
@@ -721,7 +727,7 @@ class OpenTestPage extends TestPage {
 
     test('Not in memory database', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = await initDeleteDb('not_in_memory.db');
+      final path = await initDeleteDb('not_in_memory.db');
 
       var db = await openDatabase(path);
       await db
@@ -741,13 +747,13 @@ class OpenTestPage extends TestPage {
     });
 
     test('open in sub directory', () async {
-      var databasesPath = await factory.getDatabasesPath();
-      var path = join(databasesPath, 'sub_that_should_not_exists');
+      final databasesPath = await factory.getDatabasesPath();
+      final path = join(databasesPath, 'sub_that_should_not_exists');
       try {
         await Directory(path).delete(recursive: true);
       } catch (_) {}
-      var dbPath = join(path, 'open.db');
-      var db = await factory.openDatabase(dbPath);
+      final dbPath = join(path, 'open.db');
+      final db = await factory.openDatabase(dbPath);
       try {} finally {
         await db.close();
       }
@@ -755,14 +761,15 @@ class OpenTestPage extends TestPage {
 
     test('open in sub sub directory', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var databasesPath = await factory.getDatabasesPath();
-      var path = join(databasesPath, 'sub2_that_should_not_exists', 'sub_sub');
+      final databasesPath = await factory.getDatabasesPath();
+      final path =
+          join(databasesPath, 'sub2_that_should_not_exists', 'sub_sub');
       try {
         await Directory(path).delete(recursive: true);
       } catch (_) {}
       expect(await Directory(path).exists(), false);
-      var dbPath = join(path, 'open.db');
-      var db = await factory.openDatabase(dbPath);
+      final dbPath = join(path, 'open.db');
+      final db = await factory.openDatabase(dbPath);
       try {} finally {
         await db.close();
       }
@@ -770,16 +777,16 @@ class OpenTestPage extends TestPage {
 
     test('open_close_open_no_wait', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = 'open_close_open_no_wait.db';
-      var factory = databaseFactory;
+      const path = 'open_close_open_no_wait.db';
+      final factory = databaseFactory;
       await factory.deleteDatabase(path);
-      var db = await factory.openDatabase(path,
+      final db = await factory.openDatabase(path,
           options: OpenDatabaseOptions(version: 1));
       try {
         expect(await db.getVersion(), 1);
         // close no wait
         unawaited(db.close());
-        var db2 = await factory.openDatabase(path,
+        final db2 = await factory.openDatabase(path,
             options: OpenDatabaseOptions(version: 1));
         print('$db, $db2');
         verify(db != db2);
@@ -792,8 +799,8 @@ class OpenTestPage extends TestPage {
     });
     test('close in transaction', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = 'test_close_in_transaction.db';
-      var factory = databaseFactory;
+      const path = 'test_close_in_transaction.db';
+      final factory = databaseFactory;
       await factory.deleteDatabase(path);
       var db = await factory.openDatabase(path,
           options: OpenDatabaseOptions(version: 1));
@@ -811,8 +818,8 @@ class OpenTestPage extends TestPage {
 
     test('open in transaction', () async {
       // await Sqflite.devSetDebugModeOn(true);
-      var path = 'test_close_in_transaction.db';
-      var factory = databaseFactory;
+      const path = 'test_close_in_transaction.db';
+      final factory = databaseFactory;
       await factory.deleteDatabase(path);
       var db = await factory.openDatabase(path,
           options: OpenDatabaseOptions(version: 1));
@@ -824,7 +831,7 @@ class OpenTestPage extends TestPage {
             .databaseOpenHelpers
             .remove(db.path);
 
-        var db2 = await factory.openDatabase(path,
+        final db2 = await factory.openDatabase(path,
             options: OpenDatabaseOptions(version: 1));
         print('after open');
         verify(db != db2);
@@ -844,8 +851,8 @@ class OpenTestPage extends TestPage {
     test('Open non sqlite file', () async {
       // Kind of corruption simulation
       // await Sqflite.devSetDebugModeOn(true);
-      var factory = databaseFactory;
-      var path =
+      final factory = databaseFactory;
+      final path =
           join(await factory.getDatabasesPath(), 'test_non_sqlite_file.db');
 
       await factory.deleteDatabase(path);
@@ -876,7 +883,7 @@ class OpenTestPage extends TestPage {
 
       expect(await isDatabase(path), isFalse);
       // try read-write
-      var minExpectedSize = 1000;
+      const minExpectedSize = 1000;
       expect(
           (await File(path).readAsBytes()).length, lessThan(minExpectedSize));
 

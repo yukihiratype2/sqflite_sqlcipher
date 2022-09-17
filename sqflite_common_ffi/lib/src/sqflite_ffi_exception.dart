@@ -1,3 +1,5 @@
+// ignore: implementation_imports
+import 'package:sqflite_common/src/arg_utils.dart';
 import 'package:sqflite_common_ffi/src/sqflite_ffi_impl.dart';
 import 'package:sqflite_common_ffi/src/sqflite_import.dart';
 
@@ -32,8 +34,33 @@ class SqfliteFfiException extends SqfliteDatabaseException {
   String toString() {
     var map = <String, Object?>{};
     if (details != null) {
-      map['details'] = details;
+      if (details is Map) {
+        var detailsMap = Map.from(details!).cast<String, Object?>();
+
+        /// remove sql and arguments that we h
+        detailsMap.remove('arguments');
+        detailsMap.remove('sql');
+        if (detailsMap.isNotEmpty) {
+          map['details'] = detailsMap;
+        }
+      } else {
+        map['details'] = details;
+      }
     }
-    return 'SqfliteFfiException($code${_resultCode == null ? '' : ': $_resultCode, '}, $message} ${super.toString()} $map';
+    var sb = StringBuffer();
+    sb.write(
+        'SqfliteFfiException($code${_resultCode == null ? '' : ': $_resultCode, '}, $message})');
+    if (sql != null) {
+      sb.write(' sql $sql');
+      if (sqlArguments?.isNotEmpty ?? false) {
+        sb.write(' args ${argumentsToString(sqlArguments!)}');
+      }
+    } else {
+      sb.write(' ${super.toString()}');
+    }
+    if (map.isNotEmpty) {
+      sb.write(' $map');
+    }
+    return sb.toString();
   }
 }
