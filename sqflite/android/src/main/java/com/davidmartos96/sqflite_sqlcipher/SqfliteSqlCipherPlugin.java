@@ -4,9 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 
-import net.sqlcipher.SQLException;
 import net.sqlcipher.database.SQLiteDatabase;
 
+import android.database.SQLException;
 import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.os.Handler;
 import android.os.HandlerThread;
