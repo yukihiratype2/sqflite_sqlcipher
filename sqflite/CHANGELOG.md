@@ -1,3 +1,6 @@
+## 2.2.0
+* SQLCipher version 4.5.4
+
 ## 2.1.1
 * SQLCipher version 4.5.0
 * Update Android build version
