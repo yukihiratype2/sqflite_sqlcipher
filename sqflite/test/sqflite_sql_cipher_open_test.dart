@@ -36,7 +36,8 @@ class MockScenario {
 MockScenario startScenario(List<List> data) {
   final scenario = MockScenario(data);
 
-  channel.setMockMethodCallHandler((MethodCall methodCall) async {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel,
+      (MethodCall methodCall) async {
     final index = scenario.index++;
     // devPrint('$index ${scenario.methodsCalls[index]}');
     final item = scenario.methodsCalls[index];
@@ -76,11 +77,7 @@ void main() {
       final scenario = startScenario([
         [
           'openDatabase',
-          {
-            'path': ':memory:',
-            'singleInstance': true,
-            'password': 'my_password'
-          },
+          {'path': ':memory:', 'singleInstance': true, 'password': 'my_password'},
           1
         ],
         [
@@ -90,12 +87,7 @@ void main() {
         ],
         [
           'execute',
-          {
-            'sql': 'BEGIN EXCLUSIVE',
-            'arguments': null,
-            'id': 1,
-            'inTransaction': true
-          },
+          {'sql': 'BEGIN EXCLUSIVE', 'arguments': null, 'id': 1, 'inTransaction': true},
           null
         ],
         [
@@ -119,8 +111,8 @@ void main() {
           null
         ],
       ]);
-      final db = await openDatabase(inMemoryDatabasePath,
-          password: 'my_password', version: 1, onCreate: (db, version) {});
+      final db =
+          await openDatabase(inMemoryDatabasePath, password: 'my_password', version: 1, onCreate: (db, version) {});
       await db.close();
       scenario.end();
     });

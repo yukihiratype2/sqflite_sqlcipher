@@ -1,2 +1,2 @@
 /// When opening the database (String) (optional)
-const String paramPassword = "password";
+const String paramPassword = 'password';

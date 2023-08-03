@@ -2,8 +2,6 @@ import 'package:sqflite_sqlcipher/src/sqflite_import.dart';
 import 'package:sqflite_sqlcipher/src/sql_cipher_constant.dart';
 import 'package:sqflite_sqlcipher/src/sql_cipher_open_options.dart';
 
-import 'sql_cipher_constant.dart';
-
 /// Sql Cipher database impl.
 class SqfileSqlCipherDatabaseImpl extends SqfliteDatabaseBase {
   /// Sql Cipher database ctor.

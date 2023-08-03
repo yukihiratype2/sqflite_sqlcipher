@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
 import 'package:sqflite_common/utils/utils.dart' as utils;
 import 'package:sqflite_sqlcipher/sqlite_api.dart';
 import 'package:sqflite_sqlcipher/src/factory_sql_cipher_impl.dart'
     show databaseFactory;
+import 'package:sqflite_sqlcipher/src/sqflite_import.dart' as impl;
 import 'package:sqflite_sqlcipher/src/sqflite_import.dart';
 import 'package:sqflite_sqlcipher/src/sqflite_sql_cipher_impl.dart';
 

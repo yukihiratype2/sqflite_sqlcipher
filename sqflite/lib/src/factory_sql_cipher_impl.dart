@@ -1,15 +1,15 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common/src/exception.dart'; // ignore: implementation_imports
 import 'package:sqflite_sqlcipher/src/database_sql_cipher_impl.dart';
-import 'package:flutter/services.dart';
 
 import 'sqflite_import.dart';
 import 'sqflite_sql_cipher_impl.dart';
 
 /// Platform error constant
-const String sqliteErrorCode = "sqlite_error";
+const String sqliteErrorCode = 'sqlite_error';
 
 DatabaseFactory? _databaseFactory;
 
